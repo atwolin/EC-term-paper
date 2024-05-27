@@ -1,9 +1,11 @@
+import re
 import pandas as pd
 import numpy as np
-from gensim.models import Word2Vec
-from nltk.tokenize import word_tokenize
 import nltk
-import re
+from nltk.tokenize import word_tokenize
+from gensim.models import Word2Vec
+import fasttext
+import fasttext.util
 
 
 def load_data():
@@ -39,13 +41,24 @@ def train_word2vec_model(df):
     # Train the model
     model = Word2Vec(sentences, vector_size=100, window=5, min_count=1, workers=4)
     # Save the model
-    model.save("word2vec_model.model")
+    model.save("./model/word2vec/word2vec_model.model")
+    return model
+
+
+def train_fasttext_model(df):
+    # Train the model
+    model = fasttext.train_unsupervised(
+        "./data/tokenized_mnh.txt", model="skipgram", dim=100
+    )
+    model.save_model("./model/fasttext/fastText_unsup_model.bin")
     return model
 
 
 def load_model():
-    word2vec_model = Word2Vec.load("word2vec_model.model")
+    # Word2Vec model
+    word2vec_model = Word2Vec.load("./model/word2vec/word2vec_model.model")
 
+    # GloVe model
     def load_glove(file_path):
         glove_vectors = {}
         with open(file_path, "r", encoding="utf-8") as f:
@@ -56,10 +69,13 @@ def load_model():
                 glove_vectors[word] = vector
         return glove_vectors
 
-    glove_vectors = load_glove(
-        "/home/nlplab/atwolin/EC/tp/EC-term-paper/data/glove/vectors.txt"
-    )
-    return word2vec_model, glove_vectors
+    glove_model = load_glove("./model/glove/vectors.txt")
+
+    # FastText model
+    # fastText_model = fasttext.load_model("./model/fasttext/fastText_model.bin")
+    fastText_model = fasttext.load_model("./model/fasttext/fastText_unsup_model.bin")
+
+    return word2vec_model, glove_model, fastText_model
 
 
 if __name__ == "__main__":
@@ -70,12 +86,14 @@ if __name__ == "__main__":
 
     # Train Word2Vec models
     # model = train_word2vec_model(data)
+    # fastText_model = train_fasttext_model(data)
 
     # Load the trained models
-    word2vec_model, glove_vectors = load_model()
+    word2vec_model, glove_vectors, _ = load_model()
 
     # Test the model
     test_word = "australia"
     print(f"vector for word2vec: {word2vec_model.wv[test_word]}")
     if test_word in glove_vectors:
         print(f"vector for glove: {glove_vectors[test_word]}")
+    print(f"vector for fastText: {fastText_model.get_word_vector(test_word)}")
