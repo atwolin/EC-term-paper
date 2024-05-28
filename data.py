@@ -1,0 +1,96 @@
+import sys
+import random
+import numpy as np
+import pandas as pd
+import nltk
+from gensim.models import Word2Vec
+import fasttext
+import fasttext.util
+
+
+def load_model(dim):
+    # Word2Vec model
+    word2vec_model = Word2Vec.load(f"./model/word2vec/word2vec.{dim}.model")
+
+    # GloVe model
+    def load_glove(file_path):
+        glove_vectors = {}
+        with open(file_path, "r", encoding="utf-8") as f:
+            for line in f:
+                values = line.split()
+                word = values[0]
+                vector = np.asarray(values[1:], "float32")
+                glove_vectors[word] = vector
+        return glove_vectors
+
+    glove_model = load_glove(f"./model/glove/vectors.{dim}.txt")
+
+    # FastText model
+    # fastText_model = fasttext.load_model("./model/fasttext/fastText_model.bin")
+    fastText_model = fasttext.load_model(
+        f"./model/fasttext/fastText.unsup.model.{dim}.bin"
+    )
+
+    return word2vec_model, glove_model, fastText_model
+
+
+def get_subdataset(partition_idx=1, n=500):
+    # Load dataset
+    df = pd.read_csv(
+        f"./data/partition/partition_{partition_idx}.txt", sep="\t", header=None
+    )
+    # Get a sub-dataset
+    idx = random.sample(range(0, len(df)), n)
+    data = df.iloc[idx]
+
+    return data
+
+
+def get_embeddings(model, dim, partition=1):
+    # Load the trained models
+    word2vec_model, glove_model, fastText_model = load_model(dim)
+
+    # Get the sub-dataset
+    data = get_subdataset(partition)
+
+    count = 0
+    embeddings = {}
+    for lines in data[0]:
+        for word in lines.split():
+            if count < 5:
+                # print(word)
+                print(f"word: {word}, vector: {word2vec_model.wv[word]}")
+                count += 1
+            if model == "word2vec" and word in word2vec_model.wv:
+                embeddings[word] = word2vec_model.wv[word]
+                print(f"word: {word}, vector: {word2vec_model.wv[word]}")
+            elif model == "glove" and word in glove_model:
+                embeddings[word] = glove_model[word]
+            elif model == "fasttext" and word in fastText_model:
+                embeddings[word] = fastText_model.get_word_vector(word)
+            else:
+                embeddings[word] = (
+                    word2vec_model.wv[word],
+                    glove_model[word],
+                    fastText_model.get_word_vector(word),
+                )
+
+    df = pd.DataFrame(embeddings)
+
+    return df
+
+
+if __name__ == "__main__":
+    # Get sub-dataset
+    data = get_subdataset(1)
+
+    # Get the embeddings
+    df = get_embeddings("word2vec", 10, 1)
+    print(len(df))
+
+    # Test the model
+    # test_word = "australia"
+    # print(f"vector for word2vec: {word2vec_model.wv[test_word]}")
+    # if test_word in glove_vectors:
+    #     print(f"vector for glove: {glove_vectors[test_word]}")
+    # print(f"vector for fastText: {fastText_model.get_word_vector(test_word)}")

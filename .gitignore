@@ -1,7 +1,9 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 env_ec/
-model/
+model/fasttext/
+model/glove/
+IEEE-Conference-Template/
 *.py[cod]
 *$py.class
 
