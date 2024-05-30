@@ -1,17 +1,23 @@
 import re
 import sys
+import os
+import random
 import pandas as pd
 from nltk.tokenize import word_tokenize
 from gensim.models import Word2Vec
 import fasttext
 import fasttext.util
 
+cur_path = os.getcwd()
+PATH = re.search(r"(.*EC-term-paper)", cur_path).group(0)
+print(PATH)
+
 
 def load_data():
     # Ensure having necessary NLTK data files
     # nltk.download("punkt")
     # Load dataset
-    df = pd.read_csv("./data/abcnews-date-text.csv")
+    df = pd.read_csv(f"{PATH}/data/abcnews-date-text.csv")
     return df
 
 
@@ -24,9 +30,12 @@ def preprocess_text(text):
 
 def save_tokenized_data(df):
     df["headline_text"] = df["headline_text"].apply(preprocess_text)
-    # df["tokenized"] = df["headline_text"].apply(word_tokenize)
     count = 0
-    with open("./data/tokenized_mnh.txt", "w", encoding="utf-8") as f:
+    with open(
+        f"{PATH}/data/tokenized_mnh.txt",
+        "w",
+        encoding="utf-8",
+    ) as f:
         for line in df["headline_text"]:
             if count == 0:
                 print(" ".join(line))
@@ -34,16 +43,13 @@ def save_tokenized_data(df):
             f.write(" ".join(line) + "\n")
 
 
-def partion_data():
-    os.makedirs("./data/partition", exist_ok=True)
+def partition_data():
+    os.makedirs(f"{PATH}/data/partition", exist_ok=True)
 
-    count = 0
     sentence = []
-    with open(f"./data/tokenized_mnh.txt", "r") as f:
+    with open(f"{PATH}/data/tokenized_mnh.txt", "r") as f:
         for lines in f.readlines():
             num_words = len(lines.split())
-            # print(num_words, lines)
-            # if count < 5:
             if num_words == 6:
                 sentence.append(lines)
 
@@ -53,11 +59,8 @@ def partion_data():
     # Write the sentences to a file
     for lines in sentence:
         partition_idx = hash(lines) % 100
-        # print("idx: ", partition_index)
-        # if count < 5:
-        with open(f"./data/partition/partition_{partition_idx}.txt", "a") as f:
+        with open(f"{PATH}/data/partition/partition_{partition_idx}.txt", "a") as f:
             f.write(lines)
-            # count += 1
     print("Partitioning done!")
     return None
 
@@ -68,16 +71,18 @@ def train_word2vec_model(df, dim):
     # Train the model
     model = Word2Vec(sentences, vector_size=dim, window=5, min_count=1, workers=4)
     # Save the model
-    model.save(f"./model/word2vec/word2vec.{dim}.model")
+    model.save(f"{PATH}/model/word2vec/word2vec.{dim}.model")
+    print(f"save model at {PATH}/model/word2vec/word2vec.{dim}.model")
     return model
 
 
 def train_fasttext_model(df, dim):
     # Train the model
     model = fasttext.train_unsupervised(
-        "./data/tokenized_mnh.txt", model="skipgram", minn=1, maxn=1, dim=dim
+        f"{PATH}/data/tokenized_mnh.txt", model="skipgram", minn=1, maxn=1, dim=dim
     )
-    model.save_model(f"./model/fasttext/fastText.unsup.model.{dim}.bin")
+    model.save_model(f"{PATH}/model/fasttext/fastText.model.{dim}.bin")
+    print(f"save model at {PATH}/model/fasttext/fastText.model.{dim}.bin")
     return model
 
 
@@ -90,10 +95,18 @@ if __name__ == "__main__":
     # print("finish saving tokenized data.\n")
 
     # Partition the data
-    # partion_data()
+    # partition_data()
 
     # Train Word2Vec models
-    dim = sys.argv[1] if len(sys.argv) > 2 else 10
-    model = train_word2vec_model(data, dim)
+    dim = int(sys.argv[1] if len(sys.argv) > 1 else 10)
+    print(f"dim is {dim}")
+    word2vec_model = train_word2vec_model(data, dim)
     fastText_model = train_fasttext_model(data, dim)
-    print("finish training the models.\n")
+    print("Finish training the models.\n")
+
+    # Test the model
+    test_word = "australia"
+    print(f"vector for word2vec: {word2vec_model.wv[test_word]}")
+    # if test_word in glove_vectors:
+    #     print(f"vector for glove: {glove_vectors[test_word]}")
+    print(f"vector for fastText: {fastText_model.get_word_vector(test_word)}")
