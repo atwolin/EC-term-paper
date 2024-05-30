@@ -112,6 +112,8 @@ if __name__ == "__main__":
     df = get_embeddings("word2vec", 10, 1)
     print(len(df))
 
+    print("aa")
+
     # Test the model
     # test_word = "australia"
     # print(f"vector for word2vec: {word2vec_model.wv[test_word]}")
