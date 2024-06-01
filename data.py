@@ -1,10 +1,8 @@
-import sys
 import os
 import re
 import random
 import numpy as np
 import pandas as pd
-import nltk
 from gensim.models import Word2Vec
 import fasttext
 import fasttext.util
@@ -105,6 +103,9 @@ def get_embeddings(model, dim, partition=1):
 
 
 if __name__ == "__main__":
+    # Load models
+    # word2vec_model, glove_model, fastText_model = load_model(10)
+
     # Get sub-dataset
     data = get_subdataset(1)
 
@@ -112,11 +113,9 @@ if __name__ == "__main__":
     df = get_embeddings("word2vec", 10, 1)
     print(len(df))
 
-    print("aa")
-
     # Test the model
     # test_word = "australia"
     # print(f"vector for word2vec: {word2vec_model.wv[test_word]}")
-    # if test_word in glove_vectors:
-    #     print(f"vector for glove: {glove_vectors[test_word]}")
+    # if test_word in glove_model:
+    #     print(f"vector for glove: {glove_model[test_word]}")
     # print(f"vector for fastText: {fastText_model.get_word_vector(test_word)}")
