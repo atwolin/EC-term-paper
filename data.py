@@ -113,9 +113,9 @@ if __name__ == "__main__":
     # Get the embeddings
     df = get_embeddings("word2vec", 10, 1)
     print(len(df))
-    
+    print(df.shape)
     df=df.T
-    print(df)
+    print(df.shape)
     # y = "green"
     # if y in df.index:
     #     y_embedding = df.loc[y]
@@ -123,7 +123,20 @@ if __name__ == "__main__":
     # else:
     #     print(f"Embedding for '{y}' not found in the dataset.")
 
-    run_GP(500,10,1,0.1,30,data,df)
+    x = data[0].str.split(' ').apply(lambda x: x[:5])
+    y = data[0].str.split(' ').str.get(5)
+
+    missing_words = []
+    for sentence in x:
+        #print(sentence)
+        for word in sentence:
+            if word not in df.index:
+                missing_words.append(word)
+                #print(f"Word '{word}' not found in embeddings")
+    print(f"Total missing words: {len(missing_words)}")
+    print(f"Missing words: {missing_words}")
+
+    #run_GP(500,10,1,0.1,30,data,df)
 
     # Test the model
     # test_word = "australia"

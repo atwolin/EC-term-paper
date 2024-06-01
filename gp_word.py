@@ -18,7 +18,7 @@ def protected_div(x, y):
     return x / y if y != 0 else 1
 
 class GP:
-    def __init__(self, pop_size, dim, cx_method, mut_pb, n_gen, data, df):
+    def __init__(self, pop_size, dim, cx_method, mut_pb, n_gen, data, df, x, y):
         self.pop_size = pop_size
         self.dim = dim
         self.cx_method = cx_method
@@ -27,6 +27,8 @@ class GP:
         self.pop = None
         self.data = data
         self.df = df
+        self.inputword = x
+        self.realword = y
         # self.fitness_val = None
 
     def register(self):
@@ -84,13 +86,50 @@ class GP:
     def get_data():
         pass
 
+    # def get_embedding(self, word):
+    #     print(word)
+    #     if word in self.df.index:
+    #         embedding = self.df.loc[word]
+    #         print(embedding)
+    #     else:
+    #         print(f"Embedding for '{word}' not found in the dataset.")
+    #         print(self.df)
+
+
+    # def evaluate(self, individual):
+    #     """Evalute the fitness of an individual"""
+    #     func = gp.compile(individual, self.pset)
+    #     for (a, b, c, d, e), y in zip(X, Y):
+    #         predict = func(a, b, c, d, e) ###!!!!
+    #         similarity = cosine_similarity(predict, y) ###!!!
+    #     return similarity
+        
     def evaluate(self, individual):
-        """Evalute the fitness of an individual"""
-        func = gp.compile(individual, self.pset)
-        for (a, b, c, d, e), y in zip(X, Y):
-            predict = func(a, b, c, d, e) ###!!!!
-            similarity = cosine_similarity(predict, y) ###!!!
-        return similarity
+    #"""Evaluate the fitness of an individual"""
+    # 编译个体以获取其表示的函数
+        func = gp.compile(individual, pset=self.pset)
+        total_similarity = 0.0
+        print(f"self.inputword:{self.inputword}")
+        print(f"len(self.inputword)::{len(self.inputword)}")
+        for data_index in range(len(self.inputword)):
+            print(f"data_index:{data_index}")
+            words = self.inputword.iloc[data_index]
+            print(f"words: {words}")
+            vectors = [self.get_embedding(word) for word in words]
+            print(f"vectors: {vectors}")
+            # 获取输入X的5个10维向量
+            a, b, c, d, e = self.inputword[data_index]
+            # 获取对应的Y值
+            y = self.realword[data_index]
+            # 计算预测值
+            predict = func(a, b, c, d, e)
+            # 计算预测值和真实值的余弦相似度
+            similarity = cosine_similarity([predict], [y])[0][0]
+            total_similarity += similarity
+
+            # 返回平均相似度作为适应度
+        return total_similarity / len(self.inputword)
+
 
     def cx_uniform():
        pass
@@ -173,21 +212,33 @@ class GP:
 
 def run_GP(pop_size, dim, cx_method, mut_pb, n_gen, data, df):
     #print(df)
-    print(data)
-    print(len(data))
+    #print(data)
+    #print(len(data))
+
     x = data[0].str.split(' ').apply(lambda x: x[:5])
     y = data[0].str.split(' ').str.get(5)
-    print(x)
-    print(y)
-    test = y.iloc[0]
-    print(test)
-    if test in df.index:
-        y_embedding = df.loc[test]
-        print(y_embedding)
-    else:
-        print(f"Embedding for '{test}' not found in the dataset.")
 
-    #gpp = GP(pop_size, dim, cx_method, mut_pb, n_gen, dataset, df)
-    #gpp.initialize_pop()
-    #gpp.evolve()
+    missing_words = []
+    for sentence in x:
+        #print(sentence)
+        for word in sentence:
+            if word not in df.index:
+                missing_words.append(word)
+                #print(f"Word '{word}' not found in embeddings")
+    print(f"Total missing words: {len(missing_words)}")
+    print(f"Missing words: {missing_words}")
+
+    # print(x)
+    # print(y)
+    # # test = y.iloc[0]
+    # print(test)
+    # if test in df.index:
+    #     y_embedding = df.loc[test]
+    #     print(y_embedding)
+    # else:
+    #     print(f"Embedding for '{test}' not found in the dataset.")
+
+    gpp = GP(pop_size, dim, cx_method, mut_pb, n_gen, data, df, x, y)
+    gpp.initialize_pop()
+    gpp.evolve()
     return
