@@ -2,6 +2,8 @@ env_ec/
 model/
 test.ipynb
 tutorial.ipynb
+test.ipynb
+gp_test.ipynb
 environment.yml
 
 # Byte-compiled / optimized / DLL files
