@@ -138,7 +138,7 @@ if __name__ == "__main__":
     # print(f"Total missing words: {len(missing_words)}")
     # print(f"Missing words: {missing_words[:5]}")
 
-    run_GP(500,10,1,0.1,30,data,embeddings)
+    run_GP(30,10,1,0.1,30,data,embeddings)
 
     # Test the model
     test_word = "education"

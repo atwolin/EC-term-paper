@@ -96,6 +96,7 @@ class GP:
         fitnesses = map(self.toolbox.evaluate, self.pop)
         for ind, fit in zip(self.pop, fitnesses):
             ind.fitness.values = fit
+        print(f"selfpop種類:{type(self.pop)}")
 
     def get_data():
         pass
@@ -127,6 +128,7 @@ class GP:
 
     def evaluate(self, individual):
         """Evalute the fitness of an individual"""
+        #print(f"individual種類:{type(individual)}")
         func = gp.compile(individual, self.pset)
         total_similarity = 0.0
         for data_index in range(len(self.inputword)):
@@ -214,6 +216,7 @@ class GP:
     def select_p(self):
 
         parents = self.toolbox.select(self.pop)
+        print(f"parents類型：{type(parents)}")
         #parents = map(toolbox.clone, parents)
         childs = copy.deepcopy(parents)
         return parents, childs
@@ -223,6 +226,7 @@ class GP:
         parent1, parent2 = parents
         #print(f"A是：{parent1}")
         #print(f"B是：{parent2}")
+        #print(f"crossover parents種類是：{type(parents)}")
         
         if self.cx_method == 1:
             a,b = self.toolbox.cx_simple(parent1, parent2)
@@ -252,9 +256,12 @@ class GP:
         return parents
     
     def mutate(self, child):
+        print(f"mutate類別：{type(child)}")
+        #print(child)
         if random.random() < self.mut_pb:
             self.toolbox.mutate(child)
             del child.fitness.values
+        print("mutate完成！")
         return child
     
     def select_s(self, parents, child):
@@ -262,25 +269,36 @@ class GP:
         #print(f"子代：{child}")
         all_individuals = parents + child
         #print(f"所有：{all_individuals}")
-        all_individuals.sort(key=lambda ind: self.toolbox.evaluate(ind))
-        min_individual = all_individuals[0]
+        #all_individuals.sort(key=lambda ind: self.toolbox.evaluate(ind))
+        #min_individual = all_individuals[0]
+        #print(f"all：{all_individuals}")
+        #print(f"最小ｆｉｔ值{min_fit}")
+        fitness_values = [(self.toolbox.evaluate(ind), ind) for ind in all_individuals]
+        fitness_values.sort(key=lambda x: x[0])
+        min_fitness_value, min_individual = fitness_values[0]
+        print(f"最小的适应度值: {min_fitness_value} 对应的个体: {min_individual}")
         if min_individual == child:
-            return parents
+            return 
         else:
             for i in range(len(parents)):
                 if parents[i] == min_individual:
-                    parents[i] = child
+                    index = self.pop.index(parents[i])
+                    min_individual.fitness.values = min_fitness_value
+                    self.pop[index] = min_individual
                     break
-        return parents
-
+        return
     
     def evolving(self):
         for g in range(self.n_gen):
             parents, childs = self.select_p()
-            #print(f"父母類型： {type(parents)} 小孩類型：{type(childs)}：parents是： {parents}  childs是：{childs}")
+            #print(f"父母類型： {type(parents)} 小孩類型：{type(childs)}")
             child = self.crossover(childs)
+            print(f"交叉完成type！: {type(child)}")
             child = self.mutate(child)
+            print(f"突變完成type！: {type(child)}")
             self.select_s(parents, child)
+            #self.pop.append()
+            print(f"第{g}代完成！")
 
 
          
