@@ -3,8 +3,8 @@ __pycache__/
 env_ec/
 model/
 IEEE-Conference-Template/
-
 test.ipynb
+test.py
 *.py[cod]
 *$py.class
 
@@ -13,6 +13,7 @@ test.ipynb
 
 # Distribution / packaging
 .Python
+.DS_Store
 build/
 develop-eggs/
 dist/
