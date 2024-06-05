@@ -4,8 +4,7 @@ env_ec/
 model/
 IEEE-Conference-Template/
 
-test.ipynb
-cr_add.ipynb
+test.py
 *.py[cod]
 *$py.class
 
