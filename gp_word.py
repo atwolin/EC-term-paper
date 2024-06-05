@@ -67,11 +67,10 @@ class GP:
         #註冊operators
         self.toolbox.register("select", tools.selTournament, k=2, tournsize=3)
         self.toolbox.register("cx_simple", gp.cxOnePoint)#simple crossover
-        #self.toolbox.register("cx_simple", gp.cxOnePointLeafBiased)#simple crossover
-        #toolbox.register("cx_uniform")  !!!
-        #toolbox.register("cx_fair")   !!!
-        #toolbox.register("cx_one")   !!!
-        #toolbox.register("cx_contxt")   !!!
+        self.toolbox.register("cx_uniform", self.cx_uniform) 
+        self.toolbox.register("cx_fair", self.cx_fair)   
+        self.toolbox.register("cx_one", self.cxOnePoint)   
+        
         self.toolbox.register("mutate", gp.mutUniform, expr=self.toolbox.expr, pset=self.pset)
         self.toolbox.decorate("mutate", gp.staticLimit(operator.attrgetter('height'), max_value=5)) 
         #toolbox.pbs['mutate'] =   !!! ## assign the probability along with registration pb 且取決於內部突變操作的概率控制。
@@ -98,28 +97,27 @@ class GP:
             ind.fitness.values = fit
         print(f"selfpop種類:{type(self.pop)}")
 
-    def get_data():
-        pass
+    def subtree_height(self, tree, index):
+    #"""Calculate the height of the subtree starting at the given index."""
+        def _height(node_index):
+            node = tree[node_index]
+            if node.arity == 0:  # Leaf node
+                return 1
+            else:
+                return 1 + max(_height(child_index) for child_index in range(node_index + 1, node_index + 1 + node.arity))    
+        return _height(index)
 
-    # def get_embedding(self, word):
-    #     print(word)
-    #     if word in self.embeddings.index:
-    #         embedding = self.embeddings.loc[word]
-    #         print(embedding)
-    #     else:
-    #         print(f"Embedding for '{word}' not found in the dataset.")
-    #         print(self.embeddings)
-
-    # def get_embedding(self, word):
-    #     #print(word)
-    #     if word in self.embeddings.index:
-    #         embedding = self.embeddings.loc[word]
-    #         #print(embedding)
-    #     else:
-    #         #print(f"Embedding for '{word}' not found in the dataset.")
-    #         #print(self.embeddings)
-    #         embedding = np.full(10, 0.5)
-    #     return embedding
+    def searchSubtree_idx(self, tree, begin):
+        """Return a slice object that corresponds to the
+        range of values that defines the subtree which has the
+        element with index *begin* as its root.
+        """
+        end = begin + 1
+        total = tree[begin].arity
+        while total > 0:
+            total += tree[end].arity - 1
+            end += 1
+        return begin, end
 
     def clean_data(self, data):
         data = np.where(np.isinf(data), np.finfo(np.float32).max, data)
@@ -167,56 +165,205 @@ class GP:
         ftiness = self.clean_data(fitness)
         return (fitness, )
         
-    # def evaluate(self, individual):
-    # #"""Evaluate the fitness of an individual"""
-    # # 编译个体以获取其表示的函数
-    #     func = gp.compile(individual, pset=self.pset)
-    #     total_similarity = 0.0
-    #     #print(f"self.inputword:{self.inputword}")
-    #     #print(f"len(self.inputword)::{len(self.inputword)}")
-    #     for data_index in range(len(self.inputword)):
-    #         #print(f"data_index:{data_index}")
-    #         words = self.inputword.iloc[data_index]
-    #         #print(f"words: {words}")
-    #         vectors = [self.get_embedding(word) for word in words]
-    #         #print(f"vectors: {vectors}")
-    #         # 获取输入X的5个10维向量
-    #         a, b, c, d, e = vectors[:5]
-    #         if any(vector is None for vector in [a, b, c, d, e]):
-    #             print(f"Skipping index {data_index} due to None values in vectors: {vector}")
-    #             continue
-    #         # 获取对应的Y值
-    #         #print(f"data_index:{data_index}")
-    #         y = self.realword.iloc[data_index]
-    #         vector = self.get_embedding(y)
-    #         #print(f"realword & vector : {y} , {vector}")
-    #         # 计算预测值
-    #         predict = func(a, b, c, d, e)
-    #         # 计算预测值和真实值的余弦相似度
-    #         #similarity = cosine_similarity([predict], [vector])[0][0]
-    #         #total_similarity += similarity
-
-    #         # 返回平均相似度作为适应度
-    #     #zzz = total_similarity / len(self.inputword)
-    #     #print(f"平均相似度 & type:{zzz} {type(zzz)}")
-    #     #print
-    #     zzz = 0.19
-    #     return (zzz,)
 
 
-    def cx_uniform():
-       pass
-    def cx_fair():
-       pass
-    def cx_one():
-       pass   
-    def cx_contxt():
-        pass
+    def cx_uniform(self, ind1, ind2):
+
+        if len(ind1) < 2 or len(ind2) < 2:
+            # No crossover on single node tree
+            return ind1, ind2
+        # if len(ind1) >= len(ind2):
+        #     parent = ind1
+        # else:
+        #     parent = ind2
+        #child1 = creator.Individual(ind1)
+        #child2 = creator.Individual(ind2)
+        child = type(ind1)([])
+        parents = [ind1, ind2]
+        flag0, flag1 = 0, 0
+        # p0 = parents[0].searchSubtree(0)
+        # p1 = parents[1].searchSubtree(0)
+        left_0 = parents[0].searchSubtree(1)            
+        left_1 = parents[1].searchSubtree(1)
+        b0, e0 = self.searchSubtree_idx(parents[0],1)
+        #print(f"b0={b0}, e0={e0}")
+        #print(f"parents[0]:{len(parents[0])}")
+        b1, e1 = self.searchSubtree_idx(parents[1],1)
+        #print(f"b1={b1}, e1={e1}")
+        #print(f"parents[1]:{len(parents[1])}")
+        if e0+1 < len(parents[0]):
+            right_0 = parents[0].searchSubtree(e0+1)
+            flag0=1
+        if e1+1 < len(parents[1]):
+            right_1 = parents[1].searchSubtree(e1+1)
+            flag1=1
+        left = [left_0, left_1]
+        if flag0 == 1 and flag1 == 1:
+            right = [right_0, right_1]
+        #print(f"left: {left}")
+        #print(f"right: {right}")
+        r = random.randint(0, 1) #r是root
+        if flag0 == 1 and flag1 == 1:
+            r1 = random.randint(0, 1) #r1是左邊
+        #print(f"r={r}, r1={r1}")
+        #print(f"第一個：{parents[r][left[r]]}/{parents[r1][left[r1]]}")
+            parents[r][left[r]] = parents[r1][left[r1]]
+            r2 = random.randint(0, 1)
+            parents[r][right[r]] = parents[r2][right[r2]]
+        else:
+            #print("只有一個子點")
+            r1 = random.randint(0, 1)
+            parents[r][left[r1]] = parents[r1][left[r1]]
+        # print("告一段落")
+        #print(parents[0])
+        return parents[0]
+       
+    def cx_fair(self, ind1, ind2):
+    # """size fair crossover for two trees.
+    # :param ind1: First tree participating in the crossover.
+    # :param ind2: Second tree participating in the crossover.
+    # :returns: A tuple of two trees.
+    # """
+        if len(ind1) < 2 or len(ind2) < 2:
+        # No crossover on single node tree
+            return ind1, ind2
+
+        # List all available primitive types in each individual
+        types1 = defaultdict(list)
+        types2 = defaultdict(list)
+        if ind1.root.ret == __type__:
+            # Not STGP optimization
+            types1[__type__] = list(range(1, len(ind1)))
+            types2[__type__] = list(range(1, len(ind2)))
+            common_types = [__type__]
+        else:
+            for idx, node in enumerate(ind1[1:], 1):
+                types1[node.ret].append(idx)
+            for idx, node in enumerate(ind2[1:], 1):
+                types2[node.ret].append(idx)
+            common_types = set(types1.keys()).intersection(set(types2.keys()))
+
+        if len(common_types) > 0:
+            type_ = random.choice(list(common_types))
+
+        index1 = random.choice(types1[type_])
+        height1 = subtree_height(ind1, index1)
+        #height = ind1.height
+        
+        while(1):
+            index2 = random.choice(types2[type_])
+            height2 = subtree_height(ind2, index2)
+            if height2 <= height1:
+                #print(f"height1: {height1}, height2: {height2}")
+                break 
+        slice1 = ind1.searchSubtree(index1)
+        slice2 = ind2.searchSubtree(index2)
+        ind1[slice1], ind2[slice2] = ind2[slice2], ind1[slice1]
+
+        #print(f"Parent 1:{types1}")
+        #print(f"Parent 1:{types1[3]}")
+        return ind1, ind2
+    
+    def combine_child(stack):
+        while (len(stack[-1][1]) == stack[-1][0].arity and len(stack[-1][1]) < 2):
+        # print(f"len(stack[-1][1]={len(stack[-1][1])}, stack[-1][0].arity={stack[-1][0].arity}")
+        # Extract child
+            prim, args, i2 = stack.pop()
+            string = prim.format(*args)
+            if len(stack) == 0:
+                break
+        # Add to its parent
+            stack[-1][1].append(string)
+        # print(f"[UPDATE] append stack: {stack[-1][1]}")
+        # print(f"stack: {stack}")
+
+
+    def traverse_tree(stack, res, parent, idx):
+        while (res != 0):
+        # arity1 += 1
+        # print(f"arity1: {arity1}")
+
+            res -= 1
+        # print(f"[WHILE -1] res: {res}")
+
+            idx += 1
+            stack.append((parent[idx], [], idx))
+        # print(f"[WHILE] append stack: {parent[idx1].name}")
+            res += parent[idx].arity
+        # print(f"[WHILE +arity] res: {res}")
+
+        # print("combine")
+            self.combine_child(stack)
+
+        # print(f"stack: {stack}")
+        return stack, res, idx
+
+    def cxOnePoint(self, ind1, ind2):
+   
+        idx1 = 0
+        idx2 = 0
+    # To track the trees
+        stack1 = []
+        stack2 = []
+    # Store the common region
+        region1 = []
+        region2 = []
+
+    # Start traversing the trees
+        while (idx1 < len(ind1) and idx2 < len(ind2)):
+        # Push the nodes to the stack
+        # print("================================NEW================================")
+            stack1.append((ind1[idx1], [], idx1))
+            stack2.append((ind2[idx2], [], idx2))
+        # print(f"append stack1: {ind1[idx1].name}")
+        # print(f"append stack2: {ind2[idx2].name}")
+        # print(f"stack1: {stack1}")
+        # print(f"stack2: {stack2}")
+
+
+        # Not the same region
+            if (stack1[-1][0].arity != stack2[-1][0].arity):
+                res1 = stack1[-1][0].arity
+                res2 = stack2[-1][0].arity
+            # print(f"res1: {res1}, res2: {res2}")
+            # arity1 = 0  # number of child nodes of the current node
+            # arity2 = 0
+                stack1, res1, idx1 = self.traverse_tree(stack1, res1, ind1, idx1)
+            # print("----------------------------------------STACK 2----------------------------------------")
+                stack2, res2, idx2 = self.traverse_tree(stack2, res2, ind2, idx2)
+            else:
+                region1.append([ind1[idx1], idx1])
+                region2.append([ind2[idx2], idx2])
+
+        # print("-------------1 loop for combine------------")
+            self.combine_child(stack1)
+            self.combine_child(stack2)
+            idx1 += 1
+            idx2 += 1
+
+        for pri, idx in region1:
+            print(f"{idx}: {pri.name}")
+
+    # Select crossover point
+        # point = random.randint(0, len(region1) - 1)
+        # print(f"crossover point: {point}")
+        # print(f"crossover point for trees: {region1[point]}, {region2[point]}")
+
+    # Swap subtrees
+        if (len(region1) > 0):
+            slice1 = ind1.searchSubtree(region1[point][1])
+            slice2 = ind2.searchSubtree(region2[point][1])
+            ind1[slice1], ind2[slice2] = ind2[slice2], ind1[slice1]
+
+    # Select the one has higher fitness value
+    ### TODO ###
+
+        return ind1, ind2
 
     def select_p(self):
 
         parents = self.toolbox.select(self.pop)
-        print(f"parents類型：{type(parents)}")
+        #print(f"parents類型：{type(parents)}")
         #parents = map(toolbox.clone, parents)
         childs = copy.deepcopy(parents)
         return parents, childs
@@ -231,61 +378,60 @@ class GP:
         if self.cx_method == 1:
             a,b = self.toolbox.cx_simple(parent1, parent2)
             #print(f("parents, childs是＿和＿tpye： {parents} ,{childs} ; {type(parents)},{type(childs)}"))
-            fit_a = self.toolbox.evaluate(a)
-            fit_b = self.toolbox.evaluate(b)
-            if fit_a <= fit_b:
-                parents.remove(a)
-            else:
-                parents.remove(b)
+            # fit_a = self.toolbox.evaluate(a)
+            # fit_b = self.toolbox.evaluate(b)
+            # if fit_a <= fit_b:
+            #     parents.remove(a)
+            # else:
+            #     parents.remove(b)
         elif self.cx_method == 2:
-            pass
+            a = self.toolbox.cx_uniform(parent1, parent2)
             #toolbox.cx_uniform
         elif self.cx_method == 3:
-            pass
+            a,b = self.toolbox.cx_fair(parent1, parent2)
             #toolbox.cx_fair(a, b)
         elif self.cx_method == 4:
-            pass
+            a,b = self.toolbox.cx_one(parent1, parent2)
                 #toolbox.cx_one(a, b)
-        elif self.cx_method == 5:
-            pass
-            #toolbox.cx_contxt(a, b)
-        elif self.cx_method == 6:
+        elif self.cx_method == 5: #random
             pass
                 #未完成!!!!!
+        fit_a = self.toolbox.evaluate(a)
+        if self.cx_method == 2:
+            return a
+        fit_b = self.toolbox.evaluate(b)
+        if fit_a <= fit_b:
+            parents.remove(a)
+        else:
+            parents.remove(b)
 
         return parents
     
     def mutate(self, child):
-        print(f"mutate類別：{type(child)}")
+        #print(f"mutate類別：{type(child)}")
         #print(child)
         if random.random() < self.mut_pb:
             self.toolbox.mutate(child)
             del child.fitness.values
-        print("mutate完成！")
+        #print("mutate完成！")
         return child
     
     def select_s(self, parents, child):
         #print(f"父母：{parents}")
         #print(f"子代：{child}")
-        all_individuals = parents + child
-        #print(f"所有：{all_individuals}")
-        #all_individuals.sort(key=lambda ind: self.toolbox.evaluate(ind))
-        #min_individual = all_individuals[0]
-        #print(f"all：{all_individuals}")
-        #print(f"最小ｆｉｔ值{min_fit}")
-        fitness_values = [(self.toolbox.evaluate(ind), ind) for ind in all_individuals]
-        fitness_values.sort(key=lambda x: x[0])
-        min_fitness_value, min_individual = fitness_values[0]
-        print(f"最小的适应度值: {min_fitness_value} 对应的个体: {min_individual}")
-        if min_individual == child:
-            return 
+        c_f = self.toolbox.evaluate(child)
+        p0_f = parents[0].fitness.values
+        p1_f = parents[1].fitness.values    
+        if c_f <= p0_f and c_f <= p1_f:
+            #print(f"最小的适应度值: {min_f} 对应的个体: {child}")
+            return
         else:
-            for i in range(len(parents)):
-                if parents[i] == min_individual:
-                    index = self.pop.index(parents[i])
-                    min_individual.fitness.values = min_fitness_value
-                    self.pop[index] = min_individual
-                    break
+            if min(p0_f, p1_f) == p0_f:
+                parents.remove(parents[0])
+                parents.append(child)
+            else:
+                parents.remove(parents[1])
+                parents.append(child)
         return
     
     def evolving(self):
@@ -293,9 +439,9 @@ class GP:
             parents, childs = self.select_p()
             #print(f"父母類型： {type(parents)} 小孩類型：{type(childs)}")
             child = self.crossover(childs)
-            print(f"交叉完成type！: {type(child)}")
+            #print(f"交叉完成type！: {type(child)}")
             child = self.mutate(child)
-            print(f"突變完成type！: {type(child)}")
+            #print(f"突變完成type！: {type(child)}")
             self.select_s(parents, child)
             #self.pop.append()
             print(f"第{g}代完成！")
