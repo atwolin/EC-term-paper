@@ -185,12 +185,14 @@ class GP:
         #child2 = creator.Individual(ind2)
         child = type(ind1)([])
         parents = [ind1, ind2]
+        #print(f"parents種類：{type(parents)}")
         flag0, flag1 = 0, 0
         # p0 = parents[0].searchSubtree(0)
         # p1 = parents[1].searchSubtree(0)
         left_0 = parents[0].searchSubtree(1)            
         left_1 = parents[1].searchSubtree(1)
         b0, e0 = self.searchSubtree_idx(parents[0],1)
+            #if parents[0][e0].arty
         #print(f"b0={b0}, e0={e0}")
         #print(f"parents[0]:{len(parents[0])}")
         b1, e1 = self.searchSubtree_idx(parents[1],1)
@@ -205,23 +207,43 @@ class GP:
         left = [left_0, left_1]
         if flag0 == 1 and flag1 == 1:
             right = [right_0, right_1]
+            r_arity=0
+            if parents[0][e0+1].arity == parents[1][e1+1].arity:
+                r_arity=1
         #print(f"left: {left}")
         #print(f"right: {right}")
         r = random.randint(0, 1) #r是root
+        m=1-r
+        print(parents[r])
+        print(parents[m])
+        if len(parents[r])<len(parents[m]):
+            #root = parents[r].root
+            if flag1==0 or flag0==0: 
+                return parents[r], parents[m]
+            # print("r比較小!!!!!!!!!!")
+            # print(f"parent[m][0]:{parents[m][0]}")
+            # print(f"parent[r][0]:{parents[r][0]}")
+            parents[m][0] = parents[r].root
+            m=r
+        print(parents[r])
+        print(parents[m])
         if flag0 == 1 and flag1 == 1:
             r1 = random.randint(0, 1) #r1是左邊
         #print(f"r={r}, r1={r1}")
         #print(f"第一個：{parents[r][left[r]]}/{parents[r1][left[r1]]}")
-            parents[r][left[r]] = parents[r1][left[r1]]
-            r2 = random.randint(0, 1)
-            parents[r][right[r]] = parents[r2][right[r2]]
+            if parents[r][1] == parents[r1][1]:
+                parents[r][left[r]] = parents[r1][left[r1]]
+            if r_arity == 1:
+                r2 = random.randint(0, 1)
+                parents[r][right[r]] = parents[r2][right[r2]]
         else:
             #print("只有一個子點")
             r1 = random.randint(0, 1)
             parents[r][left[r1]] = parents[r1][left[r1]]
         # print("告一段落")
-        #print(parents[0])
-        return parents[0], parents[0]
+        # print(f"父母種類：{type(parents[r])}")
+        # print(parents[r])
+        return parents[r], parents[r]
        
     def cx_fair(self, ind1, ind2):
     # """size fair crossover for two trees.
@@ -393,7 +415,7 @@ class GP:
             # else:
             #     parents.remove(b)
         if self.cx_method == 2:
-            a = self.toolbox.cx_uniform(parent1, parent2)
+            a,b = self.toolbox.cx_uniform(parent1, parent2)
             #toolbox.cx_uniform
         if self.cx_method == 3:
             a,b = self.toolbox.cx_fair(parent1, parent2)
@@ -406,7 +428,8 @@ class GP:
                 #未完成!!!!!
         fit_a = self.toolbox.evaluate(a)
         if self.cx_method == 2:
-            return a
+            parents.remove(b)
+            return parents
         fit_b = self.toolbox.evaluate(b)
         if fit_a <= fit_b:
             parents.remove(a)
