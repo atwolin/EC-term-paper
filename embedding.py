@@ -1,5 +1,4 @@
 import re
-import sys
 import os
 import random
 import pandas as pd
@@ -43,9 +42,7 @@ def save_tokenized_data(df):
             f.write(" ".join(line) + "\n")
 
 
-def partition_data():
-    os.makedirs(f"{PATH}/data/partition", exist_ok=True)
-
+def process_six_words_data():
     sentence = []
     with open(f"{PATH}/data/tokenized_mnh.txt", "r") as f:
         for lines in f.readlines():
@@ -56,12 +53,25 @@ def partition_data():
     # Shuffle the sentences
     random.shuffle(sentence)
 
-    # Write the sentences to a file
-    for lines in sentence:
+    # Save the dataset of six words
+    with open(f"{PATH}/data/six_words.txt", "w") as f:
+        for lines in sentence:
+            f.write(lines)
+
+    # Save the testing data
+    os.makedirs(f"{PATH}/data/test", exist_ok=True)
+    with open(f"{PATH}/data/test/testing.txt", "w") as f:
+        for lines in sentence[:10000]:
+            f.write(lines)
+
+    # Partition the training data
+    os.makedirs(f"{PATH}/data/train", exist_ok=True)
+    for lines in sentence[10000:]:
         partition_idx = hash(lines) % 100
-        with open(f"{PATH}/data/partition/partition_{partition_idx}.txt", "a") as f:
+        with open(f"{PATH}/data/train/partition_{partition_idx}.txt", "a") as f:
             f.write(lines)
     print("Partitioning done!")
+
     return None
 
 
@@ -94,19 +104,19 @@ if __name__ == "__main__":
     # save_tokenized_data(data)
     # print("finish saving tokenized data.\n")
 
-    # Partition the data
-    # partition_data()
+    # Extract sentences of six words and partition the data
+    process_six_words_data()
 
     # Train Word2Vec models
-    dim = int(sys.argv[1] if len(sys.argv) > 1 else 10)
-    print(f"dim is {dim}")
-    word2vec_model = train_word2vec_model(data, dim)
-    fastText_model = train_fasttext_model(data, dim)
-    print("Finish training the models.\n")
+    # dim = int(sys.argv[1] if len(sys.argv) > 1 else 10)
+    # print(f"dim is {dim}")
+    # word2vec_model = train_word2vec_model(data, dim)
+    # fastText_model = train_fasttext_model(data, dim)
+    # print("Finish training the models.\n")
 
     # Test the model
-    test_word = "australia"
-    print(f"vector for word2vec: {word2vec_model.wv[test_word]}")
+    # test_word = "australia"
+    # print(f"vector for word2vec: {word2vec_model.wv[test_word]}")
     # if test_word in glove_vectors:
     #     print(f"vector for glove: {glove_vectors[test_word]}")
-    print(f"vector for fastText: {fastText_model.get_word_vector(test_word)}")
+    # print(f"vector for fastText: {fastText_model.get_word_vector(test_word)}")

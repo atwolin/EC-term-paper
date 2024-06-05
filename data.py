@@ -7,7 +7,7 @@ from gensim.models import Word2Vec
 import fasttext
 import fasttext.util
 
-from gp_word import run_GP
+# from gp_word import run_GP
 
 cur_path = os.getcwd()
 PATH = re.search(r"(.*EC-term-paper)", cur_path).group(0)
@@ -54,7 +54,7 @@ def get_subdataset(partition_idx=1, n=500):
     """
     # Load dataset
     df = pd.read_csv(
-        f"{PATH}/data/partition/partition_{partition_idx}.txt", sep="\t", header=None
+        f"{PATH}/data/train/partition_{partition_idx}.txt", sep="\t", header=None
     )
     # Get a sub-dataset
     idx = random.sample(range(0, len(df)), n)
@@ -138,7 +138,7 @@ if __name__ == "__main__":
     # print(f"Total missing words: {len(missing_words)}")
     # print(f"Missing words: {missing_words[:5]}")
 
-    run_GP(50,10,1,0.1,500,data,embeddings)
+    # run_GP(30, 10, 5, 0.1, 30, data, embeddings)
 
     # Test the model
     test_word = "education"

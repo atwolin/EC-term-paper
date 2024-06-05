@@ -1,10 +1,11 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 env_ec/
-model/fasttext/
-model/glove/
-model/word2vec/
+model/
 IEEE-Conference-Template/
+
+test.ipynb
+cr_add.ipynb
 *.py[cod]
 *$py.class
 

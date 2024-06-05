@@ -1,0 +1,11 @@
+deap
+fasttext
+gensim
+matplotlib
+networkx
+nltk
+numpy
+pandas
+pygraphviz
+scikit-learn
+scipy==1.10.1
