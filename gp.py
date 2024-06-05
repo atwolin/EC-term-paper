@@ -8,9 +8,12 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.metrics.pairwise import cosine_similarity
+import geppy as gep
 from deap import creator, base, tools, algorithms
 import deap.gp as gp
 from deap.gp import PrimitiveSet, genGrow
+from deap.gp import cxOnePoint as cx_simple
+from data import get_embeddings
 
 
 # from collections import defaultdict
@@ -80,10 +83,10 @@ class GP:
         )  # population數ok
         # 註冊operators
         self.toolbox.register("select", tools.selTournament, k=2, tournsize=3)
-        self.toolbox.register("cx_simple", gp.cxOnePoint)  # simple crossover
+        self.toolbox.register("cx_simple", cx_simple)  # simple crossover
         self.toolbox.register("cx_uniform", self.cx_uniform)
         self.toolbox.register("cx_fair", self.cx_fair)
-        self.toolbox.register("cx_one", self.cxOnePoint)
+        self.toolbox.register("cx_one", self.cx_one_point)
 
         self.toolbox.register(
             "mutate", gp.mutUniform, expr=self.toolbox.expr, pset=self.pset
@@ -331,7 +334,7 @@ class GP:
         # print(f"stack: {stack}")
         return stack, res, idx
 
-    def cxOnePoint(self, ind1, ind2):
+    def cx_one_point(self, ind1, ind2):
 
         idx1 = 0
         idx2 = 0
@@ -531,4 +534,11 @@ def run_GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings):
     gpp = GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings, x, y)
     gpp.initialize_pop()
     gpp.evolving()
-    return
+    return None
+
+
+if __name__ == "__main__":
+    seed = 1126
+    random.seed(seed)
+    data, embeddings = get_embeddings("word2vec", 10, 1)
+    run_GP(30, 10, 4, 0.1, 30, data, embeddings)

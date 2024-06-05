@@ -5,6 +5,7 @@ model/
 IEEE-Conference-Template/
 
 test.ipynb
+cr_add.ipynb
 *.py[cod]
 *$py.class
 

@@ -7,7 +7,7 @@ from gensim.models import Word2Vec
 import fasttext
 import fasttext.util
 
-from gp_word import run_GP
+# from gp_word import run_GP
 
 cur_path = os.getcwd()
 PATH = re.search(r"(.*EC-term-paper)", cur_path).group(0)
@@ -138,7 +138,7 @@ if __name__ == "__main__":
     # print(f"Total missing words: {len(missing_words)}")
     # print(f"Missing words: {missing_words[:5]}")
 
-    run_GP(30, 10, 5, 0.1, 30, data, embeddings)
+    # run_GP(30, 10, 5, 0.1, 30, data, embeddings)
 
     # Test the model
     test_word = "education"
