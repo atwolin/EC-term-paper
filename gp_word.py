@@ -12,6 +12,7 @@ from deap.gp import PrimitiveSet, genGrow
 import math
 import random
 import copy
+#from collections import defaultdict
 
 
 
@@ -108,16 +109,20 @@ class GP:
         return _height(index)
 
     def searchSubtree_idx(self, tree, begin):
-        """Return a slice object that corresponds to the
-        range of values that defines the subtree which has the
-        element with index *begin* as its root.
-        """
         end = begin + 1
         total = tree[begin].arity
         while total > 0:
             total += tree[end].arity - 1
             end += 1
         return begin, end
+    
+    def searchSubtree(self, begin):
+        end = begin + 1
+        total = self[begin].arity
+        while total > 0:
+            total += self[end].arity - 1
+            end += 1
+        return slice(begin, end)
 
     def clean_data(self, data):
         data = np.where(np.isinf(data), np.finfo(np.float32).max, data)
@@ -216,7 +221,7 @@ class GP:
             parents[r][left[r1]] = parents[r1][left[r1]]
         # print("告一段落")
         #print(parents[0])
-        return parents[0]
+        return parents[0], parents[0]
        
     def cx_fair(self, ind1, ind2):
     # """size fair crossover for two trees.
@@ -229,13 +234,13 @@ class GP:
             return ind1, ind2
 
         # List all available primitive types in each individual
-        types1 = defaultdict(list)
-        types2 = defaultdict(list)
-        if ind1.root.ret == __type__:
+        types1 = gp.defaultdict(list)
+        types2 = gp.defaultdict(list)
+        if ind1.root.ret == gp.__type__:
             # Not STGP optimization
-            types1[__type__] = list(range(1, len(ind1)))
-            types2[__type__] = list(range(1, len(ind2)))
-            common_types = [__type__]
+            types1[gp.__type__] = list(range(1, len(ind1)))
+            types2[gp.__type__] = list(range(1, len(ind2)))
+            common_types = [gp.__type__]
         else:
             for idx, node in enumerate(ind1[1:], 1):
                 types1[node.ret].append(idx)
@@ -247,12 +252,12 @@ class GP:
             type_ = random.choice(list(common_types))
 
         index1 = random.choice(types1[type_])
-        height1 = subtree_height(ind1, index1)
+        height1 = self.subtree_height(ind1, index1)
         #height = ind1.height
         
         while(1):
             index2 = random.choice(types2[type_])
-            height2 = subtree_height(ind2, index2)
+            height2 = self.subtree_height(ind2, index2)
             if height2 <= height1:
                 #print(f"height1: {height1}, height2: {height2}")
                 break 
@@ -264,7 +269,7 @@ class GP:
         #print(f"Parent 1:{types1[3]}")
         return ind1, ind2
     
-    def combine_child(stack):
+    def combine_child(self, stack):
         while (len(stack[-1][1]) == stack[-1][0].arity and len(stack[-1][1]) < 2):
         # print(f"len(stack[-1][1]={len(stack[-1][1])}, stack[-1][0].arity={stack[-1][0].arity}")
         # Extract child
@@ -278,7 +283,7 @@ class GP:
         # print(f"stack: {stack}")
 
 
-    def traverse_tree(stack, res, parent, idx):
+    def traverse_tree(self, stack, res, parent, idx):
         while (res != 0):
         # arity1 += 1
         # print(f"arity1: {arity1}")
@@ -341,13 +346,13 @@ class GP:
             idx1 += 1
             idx2 += 1
 
-        for pri, idx in region1:
-            print(f"{idx}: {pri.name}")
+        #for pri, idx in region1:
+            #print(f"{idx}: {pri.name}")
 
     # Select crossover point
-        # point = random.randint(0, len(region1) - 1)
-        # print(f"crossover point: {point}")
-        # print(f"crossover point for trees: {region1[point]}, {region2[point]}")
+        point = random.randint(0, len(region1) - 1)
+        #print(f"crossover point: {point}")
+        #print(f"crossover point for trees: {region1[point]}, {region2[point]}")
 
     # Swap subtrees
         if (len(region1) > 0):
@@ -373,8 +378,11 @@ class GP:
         parent1, parent2 = parents
         #print(f"A是：{parent1}")
         #print(f"B是：{parent2}")
-        #print(f"crossover parents種類是：{type(parents)}")
         
+        if self.cx_method == 5:
+            choice = random.choice([self.toolbox.cx_simple, self.toolbox.cx_uniform, self.toolbox.cx_fair, self.toolbox.cx_one])
+            a,b = choice(parent1, parent2)
+            print(f"choice:{choice}")
         if self.cx_method == 1:
             a,b = self.toolbox.cx_simple(parent1, parent2)
             #print(f("parents, childs是＿和＿tpye： {parents} ,{childs} ; {type(parents)},{type(childs)}"))
@@ -384,17 +392,17 @@ class GP:
             #     parents.remove(a)
             # else:
             #     parents.remove(b)
-        elif self.cx_method == 2:
+        if self.cx_method == 2:
             a = self.toolbox.cx_uniform(parent1, parent2)
             #toolbox.cx_uniform
-        elif self.cx_method == 3:
+        if self.cx_method == 3:
             a,b = self.toolbox.cx_fair(parent1, parent2)
             #toolbox.cx_fair(a, b)
-        elif self.cx_method == 4:
+        if self.cx_method == 4:
             a,b = self.toolbox.cx_one(parent1, parent2)
                 #toolbox.cx_one(a, b)
-        elif self.cx_method == 5: #random
-            pass
+        # elif self.cx_method == 5: #random
+        #     pass
                 #未完成!!!!!
         fit_a = self.toolbox.evaluate(a)
         if self.cx_method == 2:
@@ -404,6 +412,7 @@ class GP:
             parents.remove(a)
         else:
             parents.remove(b)
+            
 
         return parents
     
@@ -411,15 +420,18 @@ class GP:
         #print(f"mutate類別：{type(child)}")
         #print(child)
         if random.random() < self.mut_pb:
+            print("mutate開始！")
             self.toolbox.mutate(child)
             del child.fitness.values
+        #evaluate = self.toolbox.evaluate(child[0])
         #print("mutate完成！")
         return child
     
     def select_s(self, parents, child):
         #print(f"父母：{parents}")
         #print(f"子代：{child}")
-        c_f = self.toolbox.evaluate(child)
+        c_f = self.toolbox.evaluate(child[0])
+        #c_f = child.fitness.valuesx
         p0_f = parents[0].fitness.values
         p1_f = parents[1].fitness.values    
         if c_f <= p0_f and c_f <= p1_f:
