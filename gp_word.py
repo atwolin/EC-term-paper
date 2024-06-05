@@ -76,7 +76,7 @@ class GP:
         self.toolbox.decorate("mutate", gp.staticLimit(operator.attrgetter('height'), max_value=5)) 
         #toolbox.pbs['mutate'] =   !!! ## assign the probability along with registration pb 且取決於內部突變操作的概率控制。
         self.toolbox.register("evaluate", self.evaluate)#
-        self.toolbox.register("compile", gp.compile, pset=self.pset)
+        #self.toolbox.register("compile", gep.compile_, pset=self.pset)
         #註冊record工具
         self.stats = tools.Statistics(key=lambda ind: ind.fitness.values) #!!!ind: ind.fitness.values[0] fitness???
         self.stats.register("avg", np.mean)
@@ -440,7 +440,7 @@ class GP:
         #print(f"mutate類別：{type(child)}")
         #print(child)
         if random.random() < self.mut_pb:
-            #print("進行mutate！")
+            print("進行mutate！")
             #print(f"child:{child} /// 零號種類：{type(child[0])}")
             self.toolbox.mutate(child[0])
             #child = self.mutUniform(child[0], self.toolbox.expr, self.pset)
@@ -473,6 +473,7 @@ class GP:
                 #child[0].fitness.value = self.toolbox.evaluate(child[0])
                 #child[0].fitness.value = temp[0]
                 #parents[1]=child[0]
+        print(f"有用篩遠")
         self.pop[idx].fitness.value = self.toolbox.evaluate(child[0])
         #print(f"有用篩遠後的適應增加 {self.pop[idx].fitness.value}")
         return
@@ -490,8 +491,9 @@ class GP:
             #print(f"突變完成type！: {type(child)}")
             self.select_s(parents, child)
             #self.pop.append()
-            if self.eval_count % 25 == 0:
+            if self.eval_count % 10 == 0:
                 print(f"ＥＶＡＬ次數：{self.eval_count}")
+                #print(f"族群 {len(self.pop)}和shape{self.pop.shape}")
                 record = self.stats.compile(self.pop)
                 print(record)
             #print(f"ＥＶＡＬ次數：{self.eval_count}")
