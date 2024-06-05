@@ -1,0 +1,252 @@
+The module graphviz is not available, on which geepy.export_expression_tree depends.
+                The geepy.graph function will not be visible until this module is installed. 
+                To install graphviz, please check https://pypi.org/project/graphviz/.
+The module sympy is not available, on which geepy.simplify depends.
+                The geepy.graph function will not be visible until this module is installed. 
+                To install graphviz, please check http://www.sympy.org/.
+selfpop種類:<class 'deap.creator.Individual'>
+ind1: subtract(square(multiply(subtract(e, e), e)), protected_div(add(square(a), add(a, c)), subtract(multiply(a, d), subtract(a, a))))
+, ind2: subtract(d, a)
+0: subtract
+crossover point: 0
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae400>, 0], [<deap.gp.Primitive object at 0x7f129cbae400>, 0]
+ind1: subtract(d, a)
+, ind2: subtract(square(multiply(subtract(e, e), e)), protected_div(add(square(a), add(a, c)), subtract(multiply(a, d), subtract(a, a))))
+進行mutate！
+第0代完成！
+ind1: add(subtract(subtract(subtract(subtract(d, d), square(a)), multiply(protected_div(d, a), protected_div(e, c))), multiply(protected_sqrt(protected_sqrt(c)), multiply(square(a), protected_sqrt(b)))), subtract(protected_sqrt(protected_sqrt(subtract(a, c))), square(subtract(subtract(c, e), multiply(b, d)))))
+, ind2: add(d, a)
+0: add
+crossover point: 0
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae4f0>, 0], [<deap.gp.Primitive object at 0x7f129cbae4f0>, 0]
+ind1: add(d, a)
+, ind2: add(subtract(subtract(subtract(subtract(d, d), square(a)), multiply(protected_div(d, a), protected_div(e, c))), multiply(protected_sqrt(protected_sqrt(c)), multiply(square(a), protected_sqrt(b)))), subtract(protected_sqrt(protected_sqrt(subtract(a, c))), square(subtract(subtract(c, e), multiply(b, d)))))
+第1代完成！
+ind1: add(subtract(b, c), b)
+, ind2: add(subtract(b, c), b)
+0: add
+1: subtract
+2: ARG1
+3: ARG2
+4: ARG1
+crossover point: 0
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae4f0>, 0], [<deap.gp.Primitive object at 0x7f129cbae4f0>, 0]
+ind1: add(subtract(b, c), b)
+, ind2: add(subtract(b, c), b)
+第2代完成！
+ind1: protected_div(e, a)
+, ind2: protected_div(e, a)
+0: protected_div
+1: ARG4
+2: ARG0
+crossover point: 2
+crossover point for trees: [<deap.gp.Terminal object at 0x7f12be7c7680>, 2], [<deap.gp.Terminal object at 0x7f12be7c7680>, 2]
+ind1: protected_div(e, a)
+, ind2: protected_div(e, a)
+第3代完成！
+ind1: add(d, a)
+, ind2: protected_div(multiply(subtract(protected_sqrt(protected_sqrt(e)), square(protected_sqrt(b))), add(square(multiply(e, c)), protected_div(multiply(c, b), multiply(c, d)))), protected_sqrt(protected_sqrt(subtract(multiply(b, b), protected_sqrt(a)))))
+0: add
+crossover point: 0
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae4f0>, 0], [<deap.gp.Primitive object at 0x7f129cbae310>, 0]
+ind1: protected_div(multiply(subtract(protected_sqrt(protected_sqrt(e)), square(protected_sqrt(b))), add(square(multiply(e, c)), protected_div(multiply(c, b), multiply(c, d)))), protected_sqrt(protected_sqrt(subtract(multiply(b, b), protected_sqrt(a)))))
+, ind2: add(d, a)
+第4代完成！
+ind1: subtract(square(multiply(subtract(e, e), e)), protected_div(add(square(a), add(a, c)), subtract(multiply(a, d), subtract(a, a))))
+, ind2: add(d, a)
+0: subtract
+crossover point: 0
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae400>, 0], [<deap.gp.Primitive object at 0x7f129cbae4f0>, 0]
+ind1: add(d, a)
+, ind2: subtract(square(multiply(subtract(e, e), e)), protected_div(add(square(a), add(a, c)), subtract(multiply(a, d), subtract(a, a))))
+進行mutate！
+第5代完成！
+ind1: subtract(protected_sqrt(b), protected_sqrt(c))
+, ind2: protected_div(multiply(subtract(protected_sqrt(protected_sqrt(e)), square(protected_sqrt(b))), add(square(multiply(e, c)), protected_div(multiply(c, b), multiply(c, d)))), protected_sqrt(protected_sqrt(subtract(multiply(b, b), protected_sqrt(a)))))
+0: subtract
+3: protected_sqrt
+crossover point: 1
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae270>, 3], [<deap.gp.Primitive object at 0x7f129cbae270>, 21]
+ind1: subtract(protected_sqrt(b), protected_sqrt(protected_sqrt(subtract(multiply(b, b), protected_sqrt(a)))))
+, ind2: protected_div(multiply(subtract(protected_sqrt(protected_sqrt(e)), square(protected_sqrt(b))), add(square(multiply(e, c)), protected_div(multiply(c, b), multiply(c, d)))), protected_sqrt(c))
+第6代完成！
+ind1: multiply(protected_div(b, c), d)
+, ind2: protected_sqrt(square(subtract(subtract(a, e), b)))
+ind1: multiply(protected_div(b, c), d)
+, ind2: protected_sqrt(square(subtract(subtract(a, e), b)))
+進行mutate！
+第7代完成！
+ind1: square(c)
+, ind2: multiply(protected_div(b, c), d)
+ind1: square(c)
+, ind2: multiply(protected_div(b, c), d)
+第8代完成！
+ind1: protected_div(multiply(subtract(c, c), protected_sqrt(b)), multiply(multiply(e, d), add(e, d)))
+, ind2: add(d, a)
+0: protected_div
+crossover point: 0
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae310>, 0], [<deap.gp.Primitive object at 0x7f129cbae4f0>, 0]
+ind1: add(d, a)
+, ind2: protected_div(multiply(subtract(c, c), protected_sqrt(b)), multiply(multiply(e, d), add(e, d)))
+第9代完成！
+ind1: add(subtract(subtract(subtract(subtract(d, d), square(a)), multiply(protected_div(d, a), protected_div(e, c))), multiply(protected_sqrt(protected_sqrt(c)), multiply(square(a), protected_sqrt(b)))), subtract(protected_sqrt(protected_sqrt(subtract(a, c))), square(subtract(subtract(c, e), multiply(b, d)))))
+, ind2: protected_div(protected_sqrt(b), add(add(a, b), add(b, b)))
+0: add
+25: subtract
+crossover point: 1
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae400>, 25], [<deap.gp.Primitive object at 0x7f129cbae4f0>, 3]
+ind1: add(subtract(subtract(subtract(subtract(d, d), square(a)), multiply(protected_div(d, a), protected_div(e, c))), multiply(protected_sqrt(protected_sqrt(c)), multiply(square(a), protected_sqrt(b)))), add(add(a, b), add(b, b)))
+, ind2: protected_div(protected_sqrt(b), subtract(protected_sqrt(protected_sqrt(subtract(a, c))), square(subtract(subtract(c, e), multiply(b, d)))))
+進行mutate！
+第10代完成！
+ind1: add(d, a)
+, ind2: square(c)
+ind1: add(d, a)
+, ind2: square(c)
+進行mutate！
+第11代完成！
+ind1: square(square(protected_div(subtract(c, e), square(b))))
+, ind2: subtract(protected_sqrt(b), protected_sqrt(c))
+ind1: square(square(protected_div(subtract(c, e), square(b))))
+, ind2: subtract(protected_sqrt(b), protected_sqrt(c))
+第12代完成！
+ind1: protected_div(multiply(subtract(c, c), protected_sqrt(b)), multiply(multiply(e, d), add(e, d)))
+, ind2: add(subtract(subtract(subtract(subtract(d, d), square(a)), multiply(protected_div(d, a), protected_div(e, c))), multiply(protected_sqrt(protected_sqrt(c)), multiply(square(a), protected_sqrt(b)))), subtract(protected_sqrt(protected_sqrt(subtract(a, c))), square(subtract(subtract(c, e), multiply(b, d)))))
+0: protected_div
+1: multiply
+2: subtract
+7: multiply
+crossover point: 0
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae310>, 0], [<deap.gp.Primitive object at 0x7f129cbae4f0>, 0]
+ind1: add(subtract(subtract(subtract(subtract(d, d), square(a)), multiply(protected_div(d, a), protected_div(e, c))), multiply(protected_sqrt(protected_sqrt(c)), multiply(square(a), protected_sqrt(b)))), subtract(protected_sqrt(protected_sqrt(subtract(a, c))), square(subtract(subtract(c, e), multiply(b, d)))))
+, ind2: protected_div(multiply(subtract(c, c), protected_sqrt(b)), multiply(multiply(e, d), add(e, d)))
+第13代完成！
+ind1: add(subtract(b, c), b)
+, ind2: protected_div(multiply(protected_div(protected_div(b, d), add(d, c)), subtract(multiply(a, b), protected_sqrt(a))), subtract(square(protected_sqrt(b)), add(multiply(c, d), add(e, c))))
+0: add
+1: subtract
+crossover point: 0
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae4f0>, 0], [<deap.gp.Primitive object at 0x7f129cbae310>, 0]
+ind1: protected_div(multiply(protected_div(protected_div(b, d), add(d, c)), subtract(multiply(a, b), protected_sqrt(a))), subtract(square(protected_sqrt(b)), add(multiply(c, d), add(e, c))))
+, ind2: add(subtract(b, c), b)
+第14代完成！
+ind1: add(subtract(subtract(subtract(subtract(d, d), square(a)), multiply(protected_div(d, a), protected_div(e, c))), multiply(protected_sqrt(protected_sqrt(c)), multiply(square(a), protected_sqrt(b)))), subtract(protected_sqrt(protected_sqrt(subtract(a, c))), square(subtract(subtract(c, e), multiply(b, d)))))
+, ind2: add(subtract(b, c), b)
+0: add
+1: subtract
+crossover point: 0
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae4f0>, 0], [<deap.gp.Primitive object at 0x7f129cbae4f0>, 0]
+ind1: add(subtract(b, c), b)
+, ind2: add(subtract(subtract(subtract(subtract(d, d), square(a)), multiply(protected_div(d, a), protected_div(e, c))), multiply(protected_sqrt(protected_sqrt(c)), multiply(square(a), protected_sqrt(b)))), subtract(protected_sqrt(protected_sqrt(subtract(a, c))), square(subtract(subtract(c, e), multiply(b, d)))))
+第15代完成！
+ind1: add(d, a)
+, ind2: add(d, a)
+0: add
+1: ARG3
+2: ARG0
+crossover point: 1
+crossover point for trees: [<deap.gp.Terminal object at 0x7f12be7c77c0>, 1], [<deap.gp.Terminal object at 0x7f12be7c77c0>, 1]
+ind1: add(d, a)
+, ind2: add(d, a)
+第16代完成！
+ind1: protected_sqrt(square(multiply(subtract(b, e), square(e))))
+, ind2: protected_div(c, a)
+ind1: protected_sqrt(square(multiply(subtract(b, e), square(e))))
+, ind2: protected_div(c, a)
+第17代完成！
+ind1: protected_div(protected_sqrt(b), add(add(a, b), add(b, b)))
+, ind2: add(subtract(b, c), b)
+0: protected_div
+crossover point: 0
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae310>, 0], [<deap.gp.Primitive object at 0x7f129cbae4f0>, 0]
+ind1: add(subtract(b, c), b)
+, ind2: protected_div(protected_sqrt(b), add(add(a, b), add(b, b)))
+第18代完成！
+ind1: protected_div(multiply(subtract(c, c), protected_sqrt(b)), multiply(multiply(e, d), add(e, d)))
+, ind2: square(square(protected_div(subtract(c, e), square(b))))
+ind1: protected_div(multiply(subtract(c, c), protected_sqrt(b)), multiply(multiply(e, d), add(e, d)))
+, ind2: square(square(protected_div(subtract(c, e), square(b))))
+第19代完成！
+ind1: protected_div(multiply(subtract(c, c), protected_sqrt(b)), multiply(multiply(e, d), add(e, d)))
+, ind2: protected_div(multiply(subtract(protected_sqrt(protected_sqrt(e)), square(protected_sqrt(b))), add(square(multiply(e, c)), protected_div(multiply(c, b), multiply(c, d)))), protected_sqrt(protected_sqrt(subtract(multiply(b, b), protected_sqrt(a)))))
+0: protected_div
+1: multiply
+2: subtract
+crossover point: 0
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae310>, 0], [<deap.gp.Primitive object at 0x7f129cbae310>, 0]
+ind1: protected_div(multiply(subtract(protected_sqrt(protected_sqrt(e)), square(protected_sqrt(b))), add(square(multiply(e, c)), protected_div(multiply(c, b), multiply(c, d)))), protected_sqrt(protected_sqrt(subtract(multiply(b, b), protected_sqrt(a)))))
+, ind2: protected_div(multiply(subtract(c, c), protected_sqrt(b)), multiply(multiply(e, d), add(e, d)))
+第20代完成！
+ind1: square(c)
+, ind2: add(subtract(subtract(subtract(subtract(d, d), square(a)), multiply(protected_div(d, a), protected_div(e, c))), multiply(protected_sqrt(protected_sqrt(c)), multiply(square(a), protected_sqrt(b)))), subtract(protected_sqrt(protected_sqrt(subtract(a, c))), square(subtract(subtract(c, e), multiply(b, d)))))
+ind1: square(c)
+, ind2: add(subtract(subtract(subtract(subtract(d, d), square(a)), multiply(protected_div(d, a), protected_div(e, c))), multiply(protected_sqrt(protected_sqrt(c)), multiply(square(a), protected_sqrt(b)))), subtract(protected_sqrt(protected_sqrt(subtract(a, c))), square(subtract(subtract(c, e), multiply(b, d)))))
+第21代完成！
+ind1: protected_div(multiply(subtract(c, c), protected_sqrt(b)), multiply(multiply(e, d), add(e, d)))
+, ind2: protected_div(c, a)
+0: protected_div
+crossover point: 0
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae310>, 0], [<deap.gp.Primitive object at 0x7f129cbae310>, 0]
+ind1: protected_div(c, a)
+, ind2: protected_div(multiply(subtract(c, c), protected_sqrt(b)), multiply(multiply(e, d), add(e, d)))
+第22代完成！
+ind1: add(subtract(b, c), b)
+, ind2: add(d, d)
+0: add
+4: ARG1
+crossover point: 1
+crossover point for trees: [<deap.gp.Terminal object at 0x7f12be7c7580>, 4], [<deap.gp.Terminal object at 0x7f12be7c77c0>, 2]
+ind1: add(subtract(b, c), d)
+, ind2: add(d, b)
+第23代完成！
+ind1: protected_div(protected_sqrt(b), add(add(a, b), add(b, b)))
+, ind2: subtract(square(multiply(subtract(e, e), e)), protected_div(add(square(a), add(a, c)), subtract(multiply(a, d), subtract(a, a))))
+0: protected_div
+1: protected_sqrt
+3: add
+4: add
+7: add
+crossover point: 1
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae270>, 1], [<deap.gp.Primitive object at 0x7f129cbae1d0>, 1]
+ind1: protected_div(square(multiply(subtract(e, e), e)), add(add(a, b), add(b, b)))
+, ind2: subtract(protected_sqrt(b), protected_div(add(square(a), add(a, c)), subtract(multiply(a, d), subtract(a, a))))
+第24代完成！
+ind1: protected_div(protected_sqrt(b), add(add(a, b), add(b, b)))
+, ind2: protected_div(multiply(protected_div(protected_div(b, d), add(d, c)), subtract(multiply(a, b), protected_sqrt(a))), subtract(square(protected_sqrt(b)), add(multiply(c, d), add(e, c))))
+0: protected_div
+3: add
+7: add
+crossover point: 1
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae4f0>, 3], [<deap.gp.Primitive object at 0x7f129cbae400>, 15]
+ind1: protected_div(protected_sqrt(b), subtract(square(protected_sqrt(b)), add(multiply(c, d), add(e, c))))
+, ind2: protected_div(multiply(protected_div(protected_div(b, d), add(d, c)), subtract(multiply(a, b), protected_sqrt(a))), add(add(a, b), add(b, b)))
+第25代完成！
+ind1: protected_div(protected_sqrt(b), add(add(a, b), add(b, b)))
+, ind2: add(subtract(b, c), b)
+0: protected_div
+crossover point: 0
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae310>, 0], [<deap.gp.Primitive object at 0x7f129cbae4f0>, 0]
+ind1: add(subtract(b, c), b)
+, ind2: protected_div(protected_sqrt(b), add(add(a, b), add(b, b)))
+第26代完成！
+ind1: protected_div(c, a)
+, ind2: protected_div(protected_sqrt(b), add(add(a, b), add(b, b)))
+0: protected_div
+crossover point: 0
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae310>, 0], [<deap.gp.Primitive object at 0x7f129cbae310>, 0]
+ind1: protected_div(protected_sqrt(b), add(add(a, b), add(b, b)))
+, ind2: protected_div(c, a)
+第27代完成！
+ind1: protected_sqrt(protected_sqrt(square(multiply(protected_sqrt(b), square(c)))))
+, ind2: protected_div(multiply(subtract(c, c), protected_sqrt(b)), multiply(multiply(e, d), add(e, d)))
+ind1: protected_sqrt(protected_sqrt(square(multiply(protected_sqrt(b), square(c)))))
+, ind2: protected_div(multiply(subtract(c, c), protected_sqrt(b)), multiply(multiply(e, d), add(e, d)))
+第28代完成！
+ind1: protected_div(multiply(protected_div(protected_div(b, d), add(d, c)), subtract(multiply(a, b), protected_sqrt(a))), subtract(square(protected_sqrt(b)), add(multiply(c, d), add(e, c))))
+, ind2: subtract(protected_sqrt(b), protected_sqrt(c))
+0: protected_div
+crossover point: 0
+crossover point for trees: [<deap.gp.Primitive object at 0x7f129cbae310>, 0], [<deap.gp.Primitive object at 0x7f129cbae400>, 0]
+ind1: subtract(protected_sqrt(b), protected_sqrt(c))
+, ind2: protected_div(multiply(protected_div(protected_div(b, d), add(d, c)), subtract(multiply(a, b), protected_sqrt(a))), subtract(square(protected_sqrt(b)), add(multiply(c, d), add(e, c))))
+第29代完成！
