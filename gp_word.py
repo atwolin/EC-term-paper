@@ -96,7 +96,7 @@ class GP:
         fitnesses = map(self.toolbox.evaluate, self.pop)
         for ind, fit in zip(self.pop, fitnesses):
             ind.fitness.values = fit
-        print(f"selfpop種類:{type(self.pop)}")
+        print(f"selfpop種類:{type(self.pop[0])}")
 
     def subtree_height(self, tree, index):
     #"""Calculate the height of the subtree starting at the given index."""
@@ -116,13 +116,13 @@ class GP:
             end += 1
         return begin, end
     
-    def searchSubtree(self, begin):
-        end = begin + 1
-        total = self[begin].arity
-        while total > 0:
-            total += self[end].arity - 1
-            end += 1
-        return slice(begin, end)
+    # def searchSubtree(self, tree, begin):
+    #     end = begin + 1
+    #     total = tree[begin].arity
+    #     while total > 0:
+    #         total += tree[end].arity - 1
+    #         end += 1
+    #     return slice(begin, end)
 
     def clean_data(self, data):
         data = np.where(np.isinf(data), np.finfo(np.float32).max, data)
@@ -415,14 +415,17 @@ class GP:
             
 
         return parents
-    
+
     def mutate(self, child):
         #print(f"mutate類別：{type(child)}")
         #print(child)
         if random.random() < self.mut_pb:
-            print("mutate開始！")
-            self.toolbox.mutate(child)
-            del child.fitness.values
+            print("進行mutate！")
+            #print(f"child:{child} /// 零號種類：{type(child[0])}")
+            self.toolbox.mutate(child[0])
+            #child = self.mutUniform(child[0], self.toolbox.expr, self.pset)
+            #print(f"mutate完成！")
+            del child[0].fitness.values
         #evaluate = self.toolbox.evaluate(child[0])
         #print("mutate完成！")
         return child
