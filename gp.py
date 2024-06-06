@@ -12,6 +12,7 @@ from deap.gp import PrimitiveSet, genGrow
 import math
 import random
 import copy
+from data import get_embeddings
 #from collections import defaultdict
 
 
@@ -41,7 +42,7 @@ class GP:
         self.embeddings = embeddings
         self.inputword = x
         self.realword = y
-        # self.fitness_val = None
+        self.eval_count = 0
 
     def register(self):
         #定義算術表達式的原語集（Primitive Set）
@@ -76,13 +77,13 @@ class GP:
         self.toolbox.decorate("mutate", gp.staticLimit(operator.attrgetter('height'), max_value=5)) 
         #toolbox.pbs['mutate'] =   !!! ## assign the probability along with registration pb 且取決於內部突變操作的概率控制。
         self.toolbox.register("evaluate", self.evaluate)#
-        self.toolbox.register("compile", gep.compile_, pset=self.pset)
+        #self.toolbox.register("compile", gep.compile_, pset=self.pset)
         #註冊record工具
-        stats = tools.Statistics(key=lambda ind: ind.fitness.values) #!!!ind: ind.fitness.values[0] fitness???
-        stats.register("avg", np.mean)
-        stats.register("std", np.std)
-        stats.register("min", np.min)
-        stats.register("max", np.max)
+        self.stats = tools.Statistics(key=lambda ind: ind.fitness.values) #!!!ind: ind.fitness.values[0] fitness???
+        self.stats.register("avg", np.mean)
+        self.stats.register("std", np.std)
+        self.stats.register("min", np.min)
+        self.stats.register("max", np.max)
 
         #print("reg done!")
 
@@ -96,7 +97,7 @@ class GP:
         fitnesses = map(self.toolbox.evaluate, self.pop)
         for ind, fit in zip(self.pop, fitnesses):
             ind.fitness.values = fit
-        print(f"selfpop種類:{type(self.pop[0])}")
+        #print(f"selfpop種類:{type(self.pop[0])}")
 
     def subtree_height(self, tree, index):
     #"""Calculate the height of the subtree starting at the given index."""
@@ -168,6 +169,7 @@ class GP:
             total_similarity += similarity
         fitness = total_similarity / len(self.inputword)
         ftiness = self.clean_data(fitness)
+        self.eval_count += 1
         return (fitness, )
         
 
@@ -214,8 +216,6 @@ class GP:
         #print(f"right: {right}")
         r = random.randint(0, 1) #r是root
         m=1-r
-        print(parents[r])
-        print(parents[m])
         if len(parents[r])<len(parents[m]):
             #root = parents[r].root
             if flag1==0 or flag0==0: 
@@ -225,8 +225,6 @@ class GP:
             # print(f"parent[r][0]:{parents[r][0]}")
             parents[m][0] = parents[r].root
             m=r
-        print(parents[r])
-        print(parents[m])
         if flag0 == 1 and flag1 == 1:
             r1 = random.randint(0, 1) #r1是左邊
         #print(f"r={r}, r1={r1}")
@@ -361,10 +359,7 @@ class GP:
             else:
                 region1.append([ind1[idx1], idx1])
                 region2.append([ind2[idx2], idx2])
-
-        # print("-------------1 loop for combine------------")
-            self.combine_child(stack1)
-            self.combine_child(stack2)
+                
             idx1 += 1
             idx2 += 1
 
@@ -372,7 +367,8 @@ class GP:
             #print(f"{idx}: {pri.name}")
 
     # Select crossover point
-        point = random.randint(0, len(region1) - 1)
+        if (len(region1) > 0):
+            point = random.randint(0, len(region1) - 1)
         #print(f"crossover point: {point}")
         #print(f"crossover point for trees: {region1[point]}, {region2[point]}")
 
@@ -459,22 +455,34 @@ class GP:
         c_f = self.toolbox.evaluate(child[0])
         #c_f = child.fitness.valuesx
         p0_f = parents[0].fitness.values
-        p1_f = parents[1].fitness.values    
+        p1_f = parents[1].fitness.values
+        #print(f"三選一：{c_f},{p0_f},{p1_f}")    
         if c_f <= p0_f and c_f <= p1_f:
-            #print(f"最小的适应度值: {min_f} 对应的个体: {child}")
             return
         else:
             if min(p0_f, p1_f) == p0_f:
-                parents.remove(parents[0])
-                parents.append(child)
+                idx=self.pop.index(parents[0])
+                self.pop[idx]=child[0]
+                #self.pop[idx].fitness.value = self.toolbox.evaluate(child[0])
+                #child[0].fitness.value = temp[0]
+                #parents[0]=child[0]
             else:
-                parents.remove(parents[1])
-                parents.append(child)
+                idx=self.pop.index(parents[1])
+                self.pop[idx]=child[0]
+                #child[0].fitness.value = self.toolbox.evaluate(child[0])
+                #child[0].fitness.value = temp[0]
+                #parents[1]=child[0]
+        print(f"有用篩遠")
+        self.pop[idx].fitness.value = self.toolbox.evaluate(child[0])
+        #print(f"有用篩遠後的適應增加 {self.pop[idx].fitness.value}")
         return
     
     def evolving(self):
-        for g in range(self.n_gen):
+        #for g in range(self.n_gen):
+        print("開始進化！")
+        while(self.eval_count < 1000):
             parents, childs = self.select_p()
+            #print(f"parents適應度: {parents[0].fitness.values},{parents[1].fitness.values}")
             #print(f"父母類型： {type(parents)} 小孩類型：{type(childs)}")
             child = self.crossover(childs)
             #print(f"交叉完成type！: {type(child)}")
@@ -482,7 +490,12 @@ class GP:
             #print(f"突變完成type！: {type(child)}")
             self.select_s(parents, child)
             #self.pop.append()
-            print(f"第{g}代完成！")
+            if self.eval_count % 10 == 0:
+                print(f"ＥＶＡＬ次數：{self.eval_count}")
+                #print(f"族群 {len(self.pop)}和shape{self.pop.shape}")
+                record = self.stats.compile(self.pop)
+                print(record)
+            #print(f"ＥＶＡＬ次數：{self.eval_count}")
 
 
          
@@ -525,3 +538,9 @@ def run_GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings):
     gpp.initialize_pop()
     gpp.evolving()
     return
+
+if __name__ == "__main__":
+    seed = 1126
+    random.seed(seed)
+    data, embeddings = get_embeddings("word2vec", 10, 1)
+    run_GP(30, 10, 4, 0.1, 30, data, embeddings)
