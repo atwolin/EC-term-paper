@@ -12,6 +12,7 @@ from deap.gp import PrimitiveSet, genGrow
 import math
 import random
 import copy
+from data import get_embeddings
 #from collections import defaultdict
 
 
@@ -76,7 +77,7 @@ class GP:
         self.toolbox.decorate("mutate", gp.staticLimit(operator.attrgetter('height'), max_value=5)) 
         #toolbox.pbs['mutate'] =   !!! ## assign the probability along with registration pb 且取決於內部突變操作的概率控制。
         self.toolbox.register("evaluate", self.evaluate)#
-        self.toolbox.register("compile", gep.compile_, pset=self.pset)
+        #self.toolbox.register("compile", gep.compile_, pset=self.pset)
         #註冊record工具
         stats = tools.Statistics(key=lambda ind: ind.fitness.values) #!!!ind: ind.fitness.values[0] fitness???
         stats.register("avg", np.mean)
@@ -325,8 +326,8 @@ class GP:
         # print(f"stack: {stack}")
         return stack, res, idx
 
-    def cx_one_point(self, ind1, ind2):
-        print(f"ind1: {ind1.__str__()}\n, ind2: {ind2.__str__()}")
+    def cxOnePoint(self, ind1, ind2):
+        #print(f"ind1: {ind1.__str__()}\n, ind2: {ind2.__str__()}")
 
         idx1 = 0
         idx2 = 0
@@ -375,8 +376,8 @@ class GP:
         # Select crossover point
         if len(region1) > 0:
             point = random.randint(0, len(region1) - 1)
-            print(f"crossover point: {point}")
-            print(f"crossover point for trees: {region1[point]}, {region2[point]}")
+            #rint(f"crossover point: {point}")
+            #print(f"crossover point for trees: {region1[point]}, {region2[point]}")
 
     # Swap subtrees
         if (len(region1) > 0):
@@ -386,7 +387,7 @@ class GP:
 
         # Select the one has higher fitness value
         ### TODO ###
-        print(f"ind1: {ind1.__str__()}\n, ind2: {ind2.__str__()}")
+        #print(f"ind1: {ind1.__str__()}\n, ind2: {ind2.__str__()}")
 
         return ind1, ind2
 
@@ -528,3 +529,9 @@ def run_GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings):
     gpp.initialize_pop()
     gpp.evolving()
     return
+
+if __name__ == "__main__":
+    seed = 1126
+    random.seed(seed)
+    data, embeddings = get_embeddings("word2vec", 10, 1)
+    run_GP(30, 10, 4, 0.1, 30, data, embeddings)
