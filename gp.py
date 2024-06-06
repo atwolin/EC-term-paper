@@ -325,8 +325,9 @@ class GP:
         # print(f"stack: {stack}")
         return stack, res, idx
 
-    def cxOnePoint(self, ind1, ind2):
-   
+    def cx_one_point(self, ind1, ind2):
+        print(f"ind1: {ind1.__str__()}\n, ind2: {ind2.__str__()}")
+
         idx1 = 0
         idx2 = 0
     # To track the trees
@@ -368,13 +369,14 @@ class GP:
             idx1 += 1
             idx2 += 1
 
-        #for pri, idx in region1:
-            #print(f"{idx}: {pri.name}")
+        # for pri, idx in region1:
+        #     print(f"{idx}: {pri.name}")
 
-    # Select crossover point
-        point = random.randint(0, len(region1) - 1)
-        #print(f"crossover point: {point}")
-        #print(f"crossover point for trees: {region1[point]}, {region2[point]}")
+        # Select crossover point
+        if len(region1) > 0:
+            point = random.randint(0, len(region1) - 1)
+            print(f"crossover point: {point}")
+            print(f"crossover point for trees: {region1[point]}, {region2[point]}")
 
     # Swap subtrees
         if (len(region1) > 0):
@@ -382,8 +384,9 @@ class GP:
             slice2 = ind2.searchSubtree(region2[point][1])
             ind1[slice1], ind2[slice2] = ind2[slice2], ind1[slice1]
 
-    # Select the one has higher fitness value
-    ### TODO ###
+        # Select the one has higher fitness value
+        ### TODO ###
+        print(f"ind1: {ind1.__str__()}\n, ind2: {ind2.__str__()}")
 
         return ind1, ind2
 
