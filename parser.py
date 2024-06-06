@@ -64,9 +64,9 @@ def parse_arguments():
     parser.add_argument(
         "-e",
         "--embeddings",
-        choices=["Word2Vec", "GloVe", "FastText"],
-        default="Word2Vec",
-        help="The embedding model to use. Word2Vec, GloVe, or FastText (default: Word2Vec)",
+        choices=["word2vec", "glove", "fasttext"],
+        default="word2vec",
+        help="The embedding model to use. word2vec, glove, or fasttext (default: Word2Vec)",
     )
     parser.add_argument(
         "-n",
