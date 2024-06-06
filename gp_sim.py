@@ -474,6 +474,7 @@ class GP:
             # child = self.mutUniform(child[0], self.toolbox.expr, self.pset)
             # print(f"mutate完成！")
             del child[0].fitness.values
+            child[0].fitness.values = self.toolbox.evaluate(child[0])
         # evaluate = self.toolbox.evaluate(child[0])
         # print("mutate完成！")
         return child
@@ -565,9 +566,9 @@ def run_GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings):
     # else:
     #     print(f"Embedding for '{test}' not found in the dataset.")
 
-    #gpp = GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings, x, y)
-    #gpp.initialize_pop()
-    #gpp.evolving()
+    gpp = GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings, x, y)
+    gpp.initialize_pop()
+    gpp.evolving()
     return
 
 

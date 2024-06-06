@@ -473,7 +473,8 @@ class GP:
             self.toolbox.mutate(child[0])
             # child = self.mutUniform(child[0], self.toolbox.expr, self.pset)
             # print(f"mutate完成！")
-            del child[0].fitness.values
+            #del child[0].fitness.values
+            child[0].fitness.values = self.toolbox.evaluate(child[0])
         # evaluate = self.toolbox.evaluate(child[0])
         # print("mutate完成！")
         return child
@@ -481,8 +482,8 @@ class GP:
     def select_s(self, parents, child):
         # print(f"父母：{parents}")
         # print(f"子代：{child}")
-        c_f = self.toolbox.evaluate(child[0])
-        # c_f = child.fitness.valuesx
+        #c_f = self.toolbox.evaluate(child[0])
+        c_f = child[0].fitness.values
         p0_f = parents[0].fitness.values
         p1_f = parents[1].fitness.values
         # print(f"三選一：{c_f},{p0_f},{p1_f}")
@@ -503,7 +504,8 @@ class GP:
                 # parents[1]=child[0]
         print(f"有用篩遠")
         self.pop[idx].fitness.value = self.toolbox.evaluate(child[0])
-        # print(f"有用篩遠後的適應增加 {self.pop[idx].fitness.value}")
+
+        #print(f"有用篩遠後的適應增加 {self.pop[idx].fitness.value}")
         return
 
     def evolving(self):
@@ -519,12 +521,11 @@ class GP:
             # print(f"突變完成type！: {type(child)}")
             self.select_s(parents, child)
             # self.pop.append()
-            if self.eval_count % 10 == 0:
+            if self.eval_count % 50 == 0:
                 print(f"ＥＶＡＬ次數：{self.eval_count}")
-                # print(f"族群 {len(self.pop)}和shape{self.pop.shape}")
                 record = self.stats.compile(self.pop)
                 print(record)
-            # print(f"ＥＶＡＬ次數：{self.eval_count}")
+               
 
 
 # def GP(Config):
@@ -565,9 +566,9 @@ def run_GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings):
     # else:
     #     print(f"Embedding for '{test}' not found in the dataset.")
 
-    #gpp = GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings, x, y)
-    #gpp.initialize_pop()
-    #gpp.evolving()
+    gpp = GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings, x, y)
+    gpp.initialize_pop()
+    gpp.evolving()
     return
 
 
