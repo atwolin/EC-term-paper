@@ -59,7 +59,7 @@ def get_training_set(partition_idx=1, n=500):
     # data = df.iloc[idx]
 
     sentence = []
-    with open(f"{PATH}/data/six_words.txt", "r") as f:
+    with open(f"{PATH}/data/train/training.txt", "r") as f:
         for line in f:
             sentence.append([line.split()[:5], line.split()[-1]])
     random.shuffle(sentence)
@@ -80,7 +80,6 @@ def get_embeddings(model, dim, partition=1):
 
     # Get the training dataset
     data = get_training_set(partition)
-    # print("data: ", data[:5])
 
     def find_embedding(model, word, word2vec_model, glove_model, fastText_model):
         if model == "word2vec" and word in word2vec_model.wv:
@@ -121,7 +120,7 @@ if __name__ == "__main__":
 
     # Get the embeddings
     data, embeddings = get_embeddings("fasttext", 10, 1)
-    # print(len(df))
+    print("data: ", type(data))
     # print(df.shape)
     # df = df.T
     # print(df.shape)
