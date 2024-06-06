@@ -46,8 +46,7 @@ def process_six_words_data():
     sentence = []
     with open(f"{PATH}/data/tokenized_mnh.txt", "r") as f:
         for lines in f.readlines():
-            num_words = len(lines.split())
-            if num_words == 6:
+            if len(lines.split()) == 6:
                 sentence.append(lines)
 
     # Shuffle the sentences
@@ -64,13 +63,19 @@ def process_six_words_data():
         for lines in sentence[:10000]:
             f.write(lines)
 
-    # Partition the training data
+    # Save the traing data
     os.makedirs(f"{PATH}/data/train", exist_ok=True)
-    for lines in sentence[10000:]:
-        partition_idx = hash(lines) % 100
-        with open(f"{PATH}/data/train/partition_{partition_idx}.txt", "a") as f:
+    with open(f"{PATH}/data/train/training.txt", "w") as f:
+        for lines in sentence[10000:]:
             f.write(lines)
-    print("Partitioning done!")
+
+    # Partition the training data
+    # os.makedirs(f"{PATH}/data/train", exist_ok=True)
+    # for lines in sentence[10000:]:
+    #     partition_idx = hash(lines) % 100
+    #     with open(f"{PATH}/data/train/partition_{partition_idx}.txt", "a") as f:
+    #         f.write(lines)
+    # print("Partitioning done!")
 
     return None
 
