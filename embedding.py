@@ -65,12 +65,12 @@ def process_six_words_data():
             f.write(lines)
 
     # Partition the training data
-    os.makedirs(f"{PATH}/data/train", exist_ok=True)
-    for lines in sentence[10000:]:
-        partition_idx = hash(lines) % 100
-        with open(f"{PATH}/data/train/partition_{partition_idx}.txt", "a") as f:
-            f.write(lines)
-    print("Partitioning done!")
+    # os.makedirs(f"{PATH}/data/train", exist_ok=True)
+    # for lines in sentence[10000:]:
+    #     partition_idx = hash(lines) % 100
+    #     with open(f"{PATH}/data/train/partition_{partition_idx}.txt", "a") as f:
+    #         f.write(lines)
+    # print("Partitioning done!")
 
     return None
 
