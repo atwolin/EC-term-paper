@@ -45,7 +45,7 @@ def load_model(dim):
     return word2vec_model, glove_model, fastText_model
 
 
-def get_training_set(partition_idx=1, n=500):
+def get_training_set(partition_idx=1):
     """
     To get a subset of a larger dataset from a text file
     :param partition_idx: index of the partition
@@ -58,13 +58,12 @@ def get_training_set(partition_idx=1, n=500):
     # idx = random.sample(range(0, len(df)), n)
     # data = df.iloc[idx]
 
-    sentence = []
-    with open(f"{PATH}/data/train/training.txt", "r") as f:
-        for line in f:
-            sentence.append([line.split()[:5], line.split()[-1]])
-    random.shuffle(sentence)
+    df = pd.read_csv(f"{PATH}/data/train/training.txt", sep="\t", header=None)
+    # Get a sub-dataset
+    idx = random.sample(range(0, len(df)), int(len(df) * (0.01)))
+    data = df.iloc[idx]
 
-    return sentence[: int(len(sentence) * (0.01))]
+    return data
 
 
 def get_embeddings(model, dim, partition=1):
@@ -81,31 +80,28 @@ def get_embeddings(model, dim, partition=1):
     # Get the training dataset
     data = get_training_set(partition)
 
-    def find_embedding(model, word, word2vec_model, glove_model, fastText_model):
-        if model == "word2vec" and word in word2vec_model.wv:
-            embeddings[word] = word2vec_model.wv[word]
-            # print(f"word: {word}, vector: {word2vec_model.wv[word]}")
-        elif model == "glove" and word in glove_model:
-            embeddings[word] = glove_model[word]
-        elif model == "fasttext" and word in fastText_model:
-            embeddings[word] = fastText_model.get_word_vector(word)
-        else:
-            embeddings[word] = (
-                word2vec_model.wv[word],
-                glove_model[word],
-                fastText_model.get_word_vector(word),
-            )
-
     # print("data: ", data[0][1])
     # count = 0
     embeddings = {}
-    for line in data:
-        for word in line[0]:
-            # Input: first fifth words
-            find_embedding(model, word, word2vec_model, glove_model, fastText_model)
-        # Output: sixth word
-        find_embedding(model, line[1], word2vec_model, glove_model, fastText_model)
-
+    for line in data[0]:
+        for word in line.split():
+            # if count < 5:
+            # print(word)
+            # print(f"word: {word}, vector: {word2vec_model.wv[word]}")
+            # count += 1
+            if model == "word2vec" and word in word2vec_model.wv:
+                embeddings[word] = word2vec_model.wv[word]
+                # print(f"word: {word}, vector: {word2vec_model.wv[word]}")
+            elif model == "glove" and word in glove_model:
+                embeddings[word] = glove_model[word]
+            elif model == "fasttext" and word in fastText_model:
+                embeddings[word] = fastText_model.get_word_vector(word)
+            else:
+                embeddings[word] = (
+                    word2vec_model.wv[word],
+                    glove_model[word],
+                    fastText_model.get_word_vector(word),
+                )
     # print("embeddings: ", embeddings[data[0][1]])
 
     return data, embeddings
