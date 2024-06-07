@@ -104,7 +104,7 @@ def get_embeddings(model, dim, partition=1):
                 )
     # print("embeddings: ", embeddings[data[0][1]])
 
-    return data, embeddings
+    return data, embeddings, word2vec_model
 
 
 if __name__ == "__main__":
