@@ -12,7 +12,7 @@ from deap.gp import PrimitiveSet, genGrow
 # import math
 import random
 import copy
-from data import get_embeddings
+from data import get_embeddings, load_model
 
 # from collections import defaultdict
 
@@ -34,11 +34,12 @@ def protected_sqrt(x):
 
 
 class GP:
-    def __init__(self, pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings, x, y):
+    def __init__(self, pop_size, dim, cx_method, mut_pb, cx_pb, n_gen, data, embeddings, x, y):
         self.pop_size = pop_size
         self.dim = dim
         self.cx_method = cx_method
         self.mut_pb = mut_pb
+        self.cx_pb = cx_pb
         self.n_gen = n_gen
         self.pop = None
         self.data = data
@@ -80,7 +81,8 @@ class GP:
             n=self.pop_size,
         )  # population數ok
         # 註冊operators
-        self.toolbox.register("select", tools.selTournament, k=2, tournsize=3)
+        #self.toolbox.register("select", tools.selTournament, k=2, tournsize=3)
+        self.toolbox.register("select", tools.selRandom, k=3)
         self.toolbox.register("cx_simple", gp.cxOnePoint)  # simple crossover
         self.toolbox.register("cx_uniform", self.cx_uniform)
         self.toolbox.register("cx_fair", self.cx_fair)
@@ -103,6 +105,7 @@ class GP:
         self.stats.register("std", np.std)
         self.stats.register("min", np.min)
         self.stats.register("max", np.max)
+        self.hof = tools.HallOfFame(10) #hall of fame size
 
         # print("reg done!")
 
@@ -312,18 +315,6 @@ class GP:
         # print(f"Parent 1:{types1[3]}")
         return ind1, ind2
 
-    def combine_child(self, stack):
-        while len(stack[-1][1]) == stack[-1][0].arity and len(stack[-1][1]) < 2:
-            # print(f"len(stack[-1][1]={len(stack[-1][1])}, stack[-1][0].arity={stack[-1][0].arity}")
-            # Extract child
-            prim, args, i2 = stack.pop()
-            string = prim.format(*args)
-            if len(stack) == 0:
-                break
-            # Add to its parent
-            stack[-1][1].append(string)
-        # print(f"[UPDATE] append stack: {stack[-1][1]}")
-        # print(f"stack: {stack}")
 
     def traverse_tree(self, stack, res, parent, idx):
         while res != 0:
@@ -406,33 +397,36 @@ class GP:
 
         return ind1, ind2
 
-    def select_p(self):
+    # def select_p(self):
 
-        parents = self.toolbox.select(self.pop)
-        # print(f"parents類型：{type(parents)}")
-        # parents = map(toolbox.clone, parents)
-        childs = copy.deepcopy(parents)
-        return parents, childs
+    #     parents = self.toolbox.select(self.pop)
+    #     # print(f"parents類型：{type(parents)}")
+    #     # parents = map(toolbox.clone, parents)
+    #     childs = copy.deepcopy(parents)
+    #     return parents, childs
 
-    def crossover(self, parents):
+    def crossover(self, ind1, ind2):
         # print(f"父母為：{parents}")
-        parent1, parent2 = parents
+        #parent1, parent2 = parents
         # print(f"A是：{parent1}")
         # print(f"B是：{parent2}")
-
-        if self.cx_method == 5:
-            choice = random.choice(
-                [
-                    self.toolbox.cx_simple,
-                    self.toolbox.cx_uniform,
-                    self.toolbox.cx_fair,
-                    self.toolbox.cx_one,
-                ]
-            )
-            a, b = choice(parent1, parent2)
-            print(f"choice:{choice}")
-        if self.cx_method == 1:
-            a, b = self.toolbox.cx_simple(parent1, parent2)
+        if random.uniform(0, 1) < self.cx_pb:
+            if self.cx_method == 5:
+                choice = random.choice(
+                    [
+                        self.toolbox.cx_simple,
+                        self.toolbox.cx_uniform,
+                        self.toolbox.cx_fair,
+                        self.toolbox.cx_one,
+                    ]
+                )
+                a, b = choice( ind1, ind2)
+            #print(f"choice:{choice}")
+            if self.cx_method == 1:
+                try:
+                    ind1, ind2 = self.toolbox.cx_simple( ind1, ind2)
+                except:
+                    pass
             # print(f("parents, childs是＿和＿tpye： {parents} ,{childs} ; {type(parents)},{type(childs)}"))
             # fit_a = self.toolbox.evaluate(a)
             # fit_b = self.toolbox.evaluate(b)
@@ -440,93 +434,138 @@ class GP:
             #     parents.remove(a)
             # else:
             #     parents.remove(b)
-        if self.cx_method == 2:
-            a, b = self.toolbox.cx_uniform(parent1, parent2)
+            if self.cx_method == 2:
+                ind1, ind2 = self.toolbox.cx_uniform( ind1, ind2)
             # toolbox.cx_uniform
-        if self.cx_method == 3:
-            a, b = self.toolbox.cx_fair(parent1, parent2)
+            if self.cx_method == 3:
+                ind1, ind2 = self.toolbox.cx_fair( ind1, ind2)
             # toolbox.cx_fair(a, b)
-        if self.cx_method == 4:
-            a, b = self.toolbox.cx_one(parent1, parent2)
+            if self.cx_method == 4:
+                ind1, ind2 = self.toolbox.cx_one( ind1, ind2)
             # toolbox.cx_one(a, b)
         # elif self.cx_method == 5: #random
         #     pass
         # 未完成!!!!!
-        fit_a = self.toolbox.evaluate(a)
-        if self.cx_method == 2:
-            parents.remove(b)
-            return parents
-        fit_b = self.toolbox.evaluate(b)
-        if fit_a <= fit_b:
-            parents.remove(a)
+        fitness_ind1 = self.toolbox.evaluate(ind1)
+        fitness_ind2 = self.toolbox.evaluate(ind2)
+        if fitness_ind1 <= fitness_ind2:
+            return ind1
         else:
-            parents.remove(b)
+            return ind2
+        # fit_a = self.toolbox.evaluate(a)
+        # if self.cx_method == 2:
+        #     parents.remove(b)
+        #     return parents
+        # fit_b = self.toolbox.evaluate(b)
+        # if fit_a <= fit_b:
+        #     parents.remove(a)
+        # else:
+        #     parents.remove(b)
 
-        return parents
+        # return parents
 
     def mutate(self, child):
         # print(f"mutate類別：{type(child)}")
         # print(child)
         if random.random() < self.mut_pb:
-            print("進行mutate！")
+            #print("進行mutate！")
             # print(f"child:{child} /// 零號種類：{type(child[0])}")
-            self.toolbox.mutate(child[0])
+            try:
+                self.toolbox.mutate(child)
+            except:
+                pass
             # child = self.mutUniform(child[0], self.toolbox.expr, self.pset)
             # print(f"mutate完成！")
-            del child[0].fitness.values
-            child[0].fitness.values = self.toolbox.evaluate(child[0])
+            #del child[0].fitness.values
+            child.fitness.values = self.toolbox.evaluate(child)
         # evaluate = self.toolbox.evaluate(child[0])
         # print("mutate完成！")
         return child
 
-    def select_s(self, parents, child):
-        # print(f"父母：{parents}")
-        # print(f"子代：{child}")
-        c_f = self.toolbox.evaluate(child[0])
-        # c_f = child.fitness.valuesx
-        p0_f = parents[0].fitness.values
-        p1_f = parents[1].fitness.values
-        # print(f"三選一：{c_f},{p0_f},{p1_f}")
-        if c_f <= p0_f and c_f <= p1_f:
-            return
-        else:
-            if min(p0_f, p1_f) == p0_f:
-                idx = self.pop.index(parents[0])
-                self.pop[idx] = child[0]
-                # self.pop[idx].fitness.value = self.toolbox.evaluate(child[0])
-                # child[0].fitness.value = temp[0]
-                # parents[0]=child[0]
-            else:
-                idx = self.pop.index(parents[1])
-                self.pop[idx] = child[0]
-                # child[0].fitness.value = self.toolbox.evaluate(child[0])
-                # child[0].fitness.value = temp[0]
-                # parents[1]=child[0]
-        print(f"有用篩遠")
-        self.pop[idx].fitness.value = self.toolbox.evaluate(child[0])
-        # print(f"有用篩遠後的適應增加 {self.pop[idx].fitness.value}")
-        return
+    # def select_s(self, parents, child):
+    #     # print(f"父母：{parents}")
+    #     # print(f"子代：{child}")
+    #     #c_f = self.toolbox.evaluate(child[0])
+    #     c_f = child[0].fitness.values
+    #     p0_f = parents[0].fitness.values
+    #     p1_f = parents[1].fitness.values
+    #     # print(f"三選一：{c_f},{p0_f},{p1_f}")
+    #     if c_f <= p0_f and c_f <= p1_f:
+    #         return
+    #     else:
+    #         if min(p0_f, p1_f) == p0_f:
+    #             idx = self.pop.index(parents[0])
+    #             self.pop[idx] = child[0]
+    #             # self.pop[idx].fitness.value = self.toolbox.evaluate(child[0])
+    #             # child[0].fitness.value = temp[0]
+    #             # parents[0]=child[0]
+    #         else:
+    #             idx = self.pop.index(parents[1])
+    #             self.pop[idx] = child[0]
+    #             # child[0].fitness.value = self.toolbox.evaluate(child[0])
+    #             # child[0].fitness.value = temp[0]
+    #             # parents[1]=child[0]
+    #     #print(f"有用篩遠")
+    #     self.pop[idx].fitness.value = self.toolbox.evaluate(child[0])
 
-    def evolving(self):
+    #     #print(f"有用篩遠後的適應增加 {self.pop[idx].fitness.value}")
+    #     return
+
+    def select(self):
+        candidates = self.toolbox.select(self.pop)
+        parents = candidates[0:3]
+        sorted_parents = sorted(parents, key=lambda ind: ind.fitness.values) #小到大排序
+        sorted_fitness = [ind.fitness.values for ind in sorted_parents]
+        offspring = self.crossover(sorted_parents[1], sorted_parents[2])
+        offspring = self.mutate(offspring)
+        off_fit = self.toolbox.evaluate(offspring)
+        if off_fit[0] >= sorted_fitness[0]:
+            idx = self.pop.index(candidates[0])
+            #print(self.pop[idx])
+            self.pop[idx] = offspring
+            #print(f"篩選後的：{self.pop[idx]}")
+            #print(off_fit[0])
+            self.pop[idx].fitness.values = self.toolbox.evaluate(offspring)
+        return    
+
+    def evolving(self, model):
         # for g in range(self.n_gen):
         print("開始進化！")
         while self.eval_count < 1000:
-            parents, childs = self.select_p()
+            self.select()
+            #parents, childs = self.select_p()
             # print(f"parents適應度: {parents[0].fitness.values},{parents[1].fitness.values}")
             # print(f"父母類型： {type(parents)} 小孩類型：{type(childs)}")
-            child = self.crossover(childs)
+            #child = self.crossover(childs)
             # print(f"交叉完成type！: {type(child)}")
-            child = self.mutate(child)
+            #child = self.mutate(child)
             # print(f"突變完成type！: {type(child)}")
-            self.select_s(parents, child)
+            #self.select_s(parents, child)
             # self.pop.append()
-            if self.eval_count % 10 == 0:
+            if self.eval_count % 20 == 0:
                 print(f"ＥＶＡＬ次數：{self.eval_count}")
-                # print(f"族群 {len(self.pop)}和shape{self.pop.shape}")
                 record = self.stats.compile(self.pop)
+                self.hof.update(self.pop)
                 print(record)
-            # print(f"ＥＶＡＬ次數：{self.eval_count}")
-
+                print(f"最佳個體：{self.hof[0]}")
+                func_best = gp.compile(self.hof[0], self.pset)
+                a, b, c, d ,e = [self.embeddings[word] for word in self.inputword.iloc[1]]
+                predict_out = func_best(a, b, c, d, e)
+                outword = model.wv.most_similar(positive=[predict_out], topn=1)
+                print(f"預測結果：{outword}")
+               
+def get_cx_num(Config):
+    if Config.crossover_method == "cxOnePoint":
+        cx_num = 1
+    elif Config.crossover_method == "cx_uniform":
+        cx_num = 2
+    elif Config.crossover_method == "cx_fair": 
+        cx_num = 3
+    elif Config.crossover_method == "cx_one":
+        cx_num = 4
+    else:
+        cx_num = 5
+    return cx_num
 
 # def GP(Config):
 #     gpp = GP(Config.pop_size, Config.dim, Config.cx_method Config.mut_pb, Config.n_gen)
@@ -534,14 +573,18 @@ class GP:
 #     gpp.evolve()
 #     return
 
-
-def run_GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings):
+def run_GP(Config):
+#def run_GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings):
     # print(embeddings)
     # print(data)
     # print(len(data))
+    word2vec_model, glove_model, fastText_model = load_model(Config.dimension)
+    data, embeddings, model = get_embeddings(Config.embeddings, Config.dimension, 1)
 
     x = data[0].str.split(" ").apply(lambda x: x[:5])
     y = data[0].str.split(" ").str.get(5)
+
+    cx_num = get_cx_num(Config)
 
     #print(f"X: {x}")
     #print(f"Y: {y}")
@@ -565,12 +608,11 @@ def run_GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings):
     #     print(y_embedding)
     # else:
     #     print(f"Embedding for '{test}' not found in the dataset.")
-
-    gpp = GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings, x, y)
+    print(x.iloc[1],y.iloc[1])
+    gpp = GP(Config.population_size, Config.dimension, cx_num, Config.mut_prob, Config.cross_prob, Config.num_generations, data, embeddings, x, y)
     gpp.initialize_pop()
-    gpp.evolving()
+    gpp.evolving(model)
     return
-
 
 if __name__ == "__main__":
     seed = 1126
