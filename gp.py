@@ -80,7 +80,8 @@ class GP:
             n=self.pop_size,
         )  # population數ok
         # 註冊operators
-        self.toolbox.register("select", tools.selTournament, k=2, tournsize=3)
+        #self.toolbox.register("select", tools.selTournament, k=2, tournsize=3)
+        self.toolbox.register("select_candidate", tools.selRandom, tournsize=3)
         self.toolbox.register("cx_simple", gp.cxOnePoint)  # simple crossover
         self.toolbox.register("cx_uniform", self.cx_uniform)
         self.toolbox.register("cx_fair", self.cx_fair)
@@ -103,6 +104,7 @@ class GP:
         self.stats.register("std", np.std)
         self.stats.register("min", np.min)
         self.stats.register("max", np.max)
+        self.hof = tools.HallOfFame(10) #hall of fame size
 
         # print("reg done!")
 
@@ -418,7 +420,7 @@ class GP:
                 ]
             )
             a, b = choice(parent1, parent2)
-            print(f"choice:{choice}")
+            #print(f"choice:{choice}")
         if self.cx_method == 1:
             a, b = self.toolbox.cx_simple(parent1, parent2)
             # print(f("parents, childs是＿和＿tpye： {parents} ,{childs} ; {type(parents)},{type(childs)}"))
@@ -456,7 +458,7 @@ class GP:
         # print(f"mutate類別：{type(child)}")
         # print(child)
         if random.random() < self.mut_pb:
-            print("進行mutate！")
+            #print("進行mutate！")
             # print(f"child:{child} /// 零號種類：{type(child[0])}")
             self.toolbox.mutate(child[0])
             # child = self.mutUniform(child[0], self.toolbox.expr, self.pset)
@@ -490,13 +492,13 @@ class GP:
                 # child[0].fitness.value = self.toolbox.evaluate(child[0])
                 # child[0].fitness.value = temp[0]
                 # parents[1]=child[0]
-        print(f"有用篩遠")
+        #print(f"有用篩遠")
         self.pop[idx].fitness.value = self.toolbox.evaluate(child[0])
 
         #print(f"有用篩遠後的適應增加 {self.pop[idx].fitness.value}")
         return
 
-    def evolving(self):
+    def evolving(self, model):
         # for g in range(self.n_gen):
         print("開始進化！")
         while self.eval_count < 1000:
@@ -512,9 +514,27 @@ class GP:
             if self.eval_count % 50 == 0:
                 print(f"ＥＶＡＬ次數：{self.eval_count}")
                 record = self.stats.compile(self.pop)
+                self.hof.update(self.pop)
                 print(record)
+                print(f"最佳個體：{self.hof[0]}")
+                func_best = gp.compile(self.hof[0], self.pset)
+                a, b, c, d ,e = [self.embeddings[word] for word in self.inputword.iloc[1]]
+                predict_out = func_best(a, b, c, d, e)
+                outword = model.wv.most_similar(positive=[predict_out], topn=1)
+                print(f"預測結果：{outword}")
                
-
+def get_cx_num(Config):
+    if Config.crossover_method == "cxOnePoint":
+        cx_num = 1
+    elif Config.crossover_method == "cx_uniform":
+        cx_num = 2
+    elif Config.crossover_method == "cx_fair": 
+        cx_num = 3
+    elif Config.crossover_method == "cx_one":
+        cx_num = 4
+    else:
+        cx_num = 5
+    return cx_num
 
 # def GP(Config):
 #     gpp = GP(Config.pop_size, Config.dim, Config.cx_method Config.mut_pb, Config.n_gen)
@@ -532,6 +552,8 @@ def run_GP(Config):
 
     x = data[0].str.split(" ").apply(lambda x: x[:5])
     y = data[0].str.split(" ").str.get(5)
+
+    cx_num = get_cx_num(Config)
 
     #print(f"X: {x}")
     #print(f"Y: {y}")
@@ -556,9 +578,9 @@ def run_GP(Config):
     # else:
     #     print(f"Embedding for '{test}' not found in the dataset.")
 
-    gpp = GP(Config.population_size, Config.dimension, Config.crossover_method, Config.mut_prob, Config.cross_prob, data, embeddings, x, y)
+    gpp = GP(Config.population_size, Config.dimension, cx_num, Config.mut_prob, Config.cross_prob, data, embeddings, x, y)
     gpp.initialize_pop()
-    gpp.evolving()
+    gpp.evolving(model)
     return
 
 
