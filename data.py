@@ -83,6 +83,7 @@ def get_embeddings(model, dim, partition=1):
     # print("data: ", data[0][1])
     # count = 0
     embeddings = {}
+    embedding_model = None
     for line in data[0]:
         for word in line.split():
             # if count < 5:
@@ -91,20 +92,24 @@ def get_embeddings(model, dim, partition=1):
             # count += 1
             if model == "word2vec" and word in word2vec_model.wv:
                 embeddings[word] = word2vec_model.wv[word]
+                embedding_model = word2vec_model
                 # print(f"word: {word}, vector: {word2vec_model.wv[word]}")
             elif model == "glove" and word in glove_model:
                 embeddings[word] = glove_model[word]
+                embedding_model = glove_model
             elif model == "fasttext" and word in fastText_model:
                 embeddings[word] = fastText_model.get_word_vector(word)
+                embedding_model = fastText_model
             else:
                 embeddings[word] = (
                     word2vec_model.wv[word],
                     glove_model[word],
                     fastText_model.get_word_vector(word),
                 )
+                embedding_model = (word2vec_model, glove_model, fastText_model)
     # print("embeddings: ", embeddings[data[0][1]])
 
-    return data, embeddings, word2vec_model
+    return data, embeddings, embedding_model
 
 
 if __name__ == "__main__":
