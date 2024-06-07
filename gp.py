@@ -12,7 +12,7 @@ from deap.gp import PrimitiveSet, genGrow
 # import math
 import random
 import copy
-from data import get_embeddings
+from data import get_embeddings, load_model
 
 # from collections import defaultdict
 
@@ -103,7 +103,6 @@ class GP:
         self.stats.register("std", np.std)
         self.stats.register("min", np.min)
         self.stats.register("max", np.max)
-        self.hof = tools.HallOfFame(10) #hall of fame size
 
         # print("reg done!")
 
@@ -313,18 +312,6 @@ class GP:
         # print(f"Parent 1:{types1[3]}")
         return ind1, ind2
 
-    def combine_child(self, stack):
-        while len(stack[-1][1]) == stack[-1][0].arity and len(stack[-1][1]) < 2:
-            # print(f"len(stack[-1][1]={len(stack[-1][1])}, stack[-1][0].arity={stack[-1][0].arity}")
-            # Extract child
-            prim, args, i2 = stack.pop()
-            string = prim.format(*args)
-            if len(stack) == 0:
-                break
-            # Add to its parent
-            stack[-1][1].append(string)
-        # print(f"[UPDATE] append stack: {stack[-1][1]}")
-        # print(f"stack: {stack}")
 
     def traverse_tree(self, stack, res, parent, idx):
         while res != 0:
@@ -431,12 +418,9 @@ class GP:
                 ]
             )
             a, b = choice(parent1, parent2)
-            #print(f"choice:{choice}")
+            print(f"choice:{choice}")
         if self.cx_method == 1:
-            try:
-                a, b = self.toolbox.cx_simple(parent1, parent2)
-            except:
-                a, b = parent1, parent2
+            a, b = self.toolbox.cx_simple(parent1, parent2)
             # print(f("parents, childs是＿和＿tpye： {parents} ,{childs} ; {type(parents)},{type(childs)}"))
             # fit_a = self.toolbox.evaluate(a)
             # fit_b = self.toolbox.evaluate(b)
@@ -472,12 +456,9 @@ class GP:
         # print(f"mutate類別：{type(child)}")
         # print(child)
         if random.random() < self.mut_pb:
-            #print("進行mutate！")
+            print("進行mutate！")
             # print(f"child:{child} /// 零號種類：{type(child[0])}")
-            try:
-                self.toolbox.mutate(child[0])
-            except:
-                pass
+            self.toolbox.mutate(child[0])
             # child = self.mutUniform(child[0], self.toolbox.expr, self.pset)
             # print(f"mutate完成！")
             #del child[0].fitness.values
@@ -509,16 +490,16 @@ class GP:
                 # child[0].fitness.value = self.toolbox.evaluate(child[0])
                 # child[0].fitness.value = temp[0]
                 # parents[1]=child[0]
-        #print(f"有用篩遠")
+        print(f"有用篩遠")
         self.pop[idx].fitness.value = self.toolbox.evaluate(child[0])
 
         #print(f"有用篩遠後的適應增加 {self.pop[idx].fitness.value}")
         return
 
-    def evolving(self, model):
+    def evolving(self):
         # for g in range(self.n_gen):
         print("開始進化！")
-        while self.eval_count < 1000000:
+        while self.eval_count < 1000:
             parents, childs = self.select_p()
             # print(f"parents適應度: {parents[0].fitness.values},{parents[1].fitness.values}")
             # print(f"父母類型： {type(parents)} 小孩類型：{type(childs)}")
@@ -531,14 +512,7 @@ class GP:
             if self.eval_count % 50 == 0:
                 print(f"ＥＶＡＬ次數：{self.eval_count}")
                 record = self.stats.compile(self.pop)
-                self.hof.update(self.pop)
                 print(record)
-                print(f"最佳個體：{self.hof[0]}")
-                func_best = gp.compile(self.hof[0], self.pset)
-                a, b, c, d ,e = [self.embeddings[word] for word in self.inputword.iloc[1]]
-                predict_out = func_best(a, b, c, d, e)
-                outword = model.wv.most_similar(positive=[predict_out], topn=1)
-                print(f"預測結果：{outword}")
                
 
 
@@ -548,11 +522,13 @@ class GP:
 #     gpp.evolve()
 #     return
 
-
-def run_GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings, model):
+def run_GP(Config):
+#def run_GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings):
     # print(embeddings)
     # print(data)
     # print(len(data))
+    word2vec_model, glove_model, fastText_model = load_model(Config.dimension)
+    data, embeddings, model = get_embeddings(Config.embeddings, Config.dimension, 1)
 
     x = data[0].str.split(" ").apply(lambda x: x[:5])
     y = data[0].str.split(" ").str.get(5)
@@ -570,8 +546,8 @@ def run_GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings, model):
     # print(f"Total missing words: {len(missing_words)}")
     # print(f"Missing words: {missing_words}")
 
-    #print(x)
-    #print(y)
+    # print(x)
+    # print(y)
     # # test = y.iloc[0]
     # print(test)
     # if test in embeddings.index:
@@ -579,15 +555,15 @@ def run_GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings, model):
     #     print(y_embedding)
     # else:
     #     print(f"Embedding for '{test}' not found in the dataset.")
-    print(x.iloc[1],y.iloc[1])
-    gpp = GP(pop_size, dim, cx_method, mut_pb, n_gen, data, embeddings, x, y)
+
+    gpp = GP(Config.population_size, Config.dimension, Config.crossover_method, Config.mut_prob, Config.cross_prob, data, embeddings, x, y)
     gpp.initialize_pop()
-    gpp.evolving(model)
+    gpp.evolving()
     return
 
 
 if __name__ == "__main__":
     seed = 1126
     random.seed(seed)
-    data, embeddings, w2vmodel = get_embeddings("word2vec", 10, 1)
-    run_GP(300, 10, 5, 0.1, 30, data, embeddings, w2vmodel)
+    data, embeddings = get_embeddings("word2vec", 10, 1)
+    run_GP(30, 10, 4, 0.1, 30, data, embeddings)
