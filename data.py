@@ -97,14 +97,23 @@ def get_embeddings(model, dim, partition=1):
             elif model == "fasttext" and word in fastText_model:
                 embeddings[word] = fastText_model.get_word_vector(word)
             else:
-                embeddings[word] = (
-                    word2vec_model.wv[word],
-                    glove_model[word],
-                    fastText_model.get_word_vector(word),
-                )
+                # embeddings[word] = (
+                #     word2vec_model.wv[word],
+                #     glove_model[word],
+                #     fastText_model.get_word_vector(word),
+                # )
+                similar_word = [word2vec_model.wv.most_similar(word, topn=1)][0][0][0]
+                embeddings[word] = word2vec_model.wv[similar_word]
+                #print(f"word: {word}, vector: {embeddings[word]}")
     # print("embeddings: ", embeddings[data[0][1]])
+    if model == "word2vec":
+        return_model = word2vec_model
+    elif model == "glove":
+        return_model = glove_model
+    elif model == "fasttext":
+        return_model = fastText_model
 
-    return data, embeddings, word2vec_model
+    return data, embeddings, return_model
 
 
 if __name__ == "__main__":

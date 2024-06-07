@@ -8,6 +8,7 @@ from deap import creator, base, tools, algorithms
 import operator
 import deap.gp as gp
 from deap.gp import PrimitiveSet, genGrow
+import csv
 
 # import math
 import random
@@ -27,7 +28,8 @@ def protected_sqrt(x):
 
 
 class GP:
-    def __init__(self, pop_size, dim, cx_method, mut_pb, cx_pb, n_gen, data, embeddings, x, y):
+    def __init__(self, embedding_model, pop_size, dim, cx_method, mut_pb, cx_pb, n_gen, data, embeddings, x, y):
+        self.embeddings_model = embedding_model
         self.pop_size = pop_size
         self.dim = dim
         self.cx_method = cx_method
@@ -146,11 +148,25 @@ class GP:
             words = self.inputword.iloc[data_index]
             in_vectors = [self.embeddings[word] for word in words]
             a, b, c, d, e = in_vectors[:5]
-
+            #print(f"in_vectors: {in_vectors}")
             y = self.realword.iloc[data_index]
+            #print(f"y: {y}")
             out_vector = self.embeddings[y]
+            #print(f"out_vector: {out_vector}")
+            #if out_vector.ndim == 3:
+                #out_vector = out_vector.reshape(1, -1)
 
             predict = self.clean_data(func(a, b, c, d, e))
+            #print(predict)
+            # if isinstance(predict, tuple):
+            #     predict = np.array(predict)
+            #     print(predict)
+            # if predict.ndim == 3:
+            #     print(predict)
+            #     predict = predict.reshape(1, -1)
+
+            #print("predict after clean:", np.array(predict).shape)
+            #print("Shape of out_vector:", np.array(out_vector).shape)
 
             similarity = cosine_similarity([predict], [out_vector])[0][0]
             total_similarity += similarity
@@ -316,7 +332,10 @@ class GP:
                         self.toolbox.cx_one,
                     ]
                 )
-                a, b = choice( ind1, ind2)
+                try:
+                    ind1, ind2 = choice( ind1, ind2)
+                except:
+                    pass
             #print(f"choice:{choice}")
             if self.cx_method == 1:
                 try:
@@ -370,24 +389,41 @@ class GP:
             #print(f"篩選後的：{self.pop[idx]}")
             #print(off_fit[0])
             self.pop[idx].fitness.values = self.toolbox.evaluate(offspring)
-        return    
+        return   
+    
+
+    def write_record(self, writer):
+        print(f"ＥＶＡＬ次數：{self.eval_count}")
+        record = self.stats.compile(self.pop)
+        self.hof.update(self.pop)
+        print(record)
+        print(f"最佳個體：{self.hof[0]}")
+        best_ind = str(self.hof[0])
+        row = [self.eval_count] + list(record.values()) + [best_ind]
+        writer.writerow(row)
+        # func_best = gp.compile(self.hof[0], self.pset)
+        # a, b, c, d ,e = [self.embeddings[word] for word in self.inputword.iloc[1]]
+        # predict_out = func_best(a, b, c, d, e)
+        # print(f"預測結果：{predict_out}")
+        # if self.embeddings_model == "word2vec":
+        #     outword = model.wv.most_similar(positive=[predict_out], topn=1)
+        # elif self.embeddings_model == "glove":
+        #     outword = model.wv.most_similar(positive=[predict_out], topn=1)
+        # elif self.embeddings_model == "fasttext":
+        #     outword = model.get_nearest_neighbors(predict_out, k=1)
+        # print(f"預測結果：{outword}")
+
 
     def evolving(self, model):
         # for g in range(self.n_gen):
         print("開始進化！")
-        while self.eval_count < 1000:
-            self.select()
-            if self.eval_count % 20 == 0:
-                print(f"ＥＶＡＬ次數：{self.eval_count}")
-                record = self.stats.compile(self.pop)
-                self.hof.update(self.pop)
-                print(record)
-                print(f"最佳個體：{self.hof[0]}")
-                func_best = gp.compile(self.hof[0], self.pset)
-                a, b, c, d ,e = [self.embeddings[word] for word in self.inputword.iloc[1]]
-                predict_out = func_best(a, b, c, d, e)
-                outword = model.wv.most_similar(positive=[predict_out], topn=1)
-                print(f"預測結果：{outword}")
+        with open('record.csv', 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(["eval_count", "avg", "std", "min", "max", "best_individual"])
+            while self.eval_count < 1000:
+                self.select()
+                if self.eval_count % 1 == 0:
+                    self.write_record(writer)
                
 def get_cx_num(Config):
     if Config.crossover_method == "cxOnePoint":
@@ -413,13 +449,13 @@ def run_GP(Config):
     cx_num = get_cx_num(Config)
 
     print(x.iloc[1],y.iloc[1])
-    gpp = GP(Config.population_size, Config.dimension, cx_num, Config.mut_prob, Config.cross_prob, Config.num_generations, data, embeddings, x, y)
+    gpp = GP(Config.embeddings, Config.population_size, Config.dimension, cx_num, Config.mut_prob, Config.cross_prob, Config.num_generations, data, embeddings, x, y)
     gpp.initialize_pop()
     gpp.evolving(model)
     return
 
-if __name__ == "__main__":
-    seed = 1126
-    random.seed(seed)
-    data, embeddings = get_embeddings("word2vec", 10, 1)
-    run_GP(30, 10, 4, 0.1, 30, data, embeddings)
+# if __name__ == "__main__":
+#     seed = 1126
+#     random.seed(seed)
+#     data, embeddings = get_embeddings("word2vec", 10, 1)
+#     run_GP(30, 10, 4, 0.1, 30, data, embeddings)
