@@ -81,14 +81,14 @@ def get_embeddings(model, dim, partition=1):
     data = get_training_set(partition)
 
     # print("data: ", data[0][1])
-    # count = 0
+    count = 0
     embeddings = {}
     for line in data[0]:
         for word in line.split():
-            # if count < 5:
+            if count < 5:
             # print(word)
             # print(f"word: {word}, vector: {word2vec_model.wv[word]}")
-            # count += 1
+                count += 1
             if model == "word2vec" and word in word2vec_model.wv:
                 embeddings[word] = word2vec_model.wv[word]
                 # print(f"word: {word}, vector: {word2vec_model.wv[word]}")
