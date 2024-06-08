@@ -85,9 +85,9 @@ def parse_arguments():
     parser.add_argument(
         "-c",
         "--crossover_method",
-        choices=["cxOnePoint", "cx_uniform", "cx_fair", "cx_one", "cx_contxt"],
+        choices=["cxOnePoint", "cx_uniform", "cx_fair", "cx_one", "cx_random"],
         default="cxOnePoint",
-        help="The crossover method to use. cxOnePoint, cx_uniform, cx_fair, cx_one, or cx_contxt (default: cxOnePoint)",
+        help="The crossover method to use. cxOnePoint, cx_uniform, cx_fair, cx_one, or cx_random (default: cxOnePoint)",
     )
     parser.add_argument(
         "-pc",
@@ -124,8 +124,8 @@ def parse_arguments():
         dimension=args.dimension,
         population_size=args.population_size,
         crossover_method=args.crossover_method,
-        cross_prob=args.pc,
-        mut_prob=args.pm,
+        cross_prob=args.prob_crossover,
+        mut_prob=args.prob_mutation,
         num_generations=args.generations,
         debug=args.debug,
     )

@@ -119,15 +119,15 @@ def get_embeddings(model, dim, partition=1):
     data = get_training_set(partition)
 
     # print("data: ", data[0][1])
-    # count = 0
+    count = 0
     embeddings = {}
     embedding_model = None
     for line in data[0]:
         for word in line.split():
-            # if count < 5:
+            if count < 5:
             # print(word)
             # print(f"word: {word}, vector: {word2vec_model.wv[word]}")
-            # count += 1
+                count += 1
             if model == "word2vec" and word in word2vec_model.wv:
                 embeddings[word] = word2vec_model.wv[word]
                 embedding_model = word2vec_model
@@ -139,15 +139,24 @@ def get_embeddings(model, dim, partition=1):
                 embeddings[word] = fastText_model.get_word_vector(word)
                 embedding_model = fastText_model
             else:
-                embeddings[word] = (
-                    word2vec_model.wv[word],
-                    glove_model[word],
-                    fastText_model.get_word_vector(word),
-                )
-                embedding_model = (word2vec_model, glove_model, fastText_model)
+                # embeddings[word] = (
+                #     word2vec_model.wv[word],
+                #     glove_model[word],
+                #     fastText_model.get_word_vector(word),
+                # )
+#                 similar_word = [word2vec_model.wv.most_similar(word, topn=1)][0][0][0]
+#                 embeddings[word] = word2vec_model.wv[similar_word]
+                #print(f"word: {word}, vector: {embeddings[word]}")
     # print("embeddings: ", embeddings[data[0][1]])
+    if model == "word2vec":
+        return_model = word2vec_model
+    elif model == "glove":
+        return_model = glove_model
+    elif model == "fasttext":
+        return_model = fastText_model
 
-    return data, embeddings, embedding_model
+    return data, embeddings, return_model
+
 
 
 if __name__ == "__main__":

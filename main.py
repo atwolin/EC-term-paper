@@ -8,4 +8,6 @@ if __name__ == "__main__":
     # using '-d' to turn on debug flag
     if config.debug:
         config.print_configuration()
-    run_GP(Config)
+    #print(Config.dimension)
+    run_GP(config)
+

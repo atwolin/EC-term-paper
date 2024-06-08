@@ -1,0 +1,4 @@
+eval_count,avg,std,min,max,best_individual
+25,0.11341887444019336,0.31775152491451203,-0.7445683901031763,0.6433070843928358,"protected_div(add(add(multiply(d, c), a), add(e, e)), protected_sqrt(add(add(e, b), subtract(b, a))))"
+30,0.10552617059724982,0.3163598355545639,-0.7445683901031763,0.6433070843928358,"protected_div(add(add(multiply(d, c), a), add(e, e)), protected_sqrt(add(add(e, b), subtract(b, a))))"
+35,0.1035846420051129,0.31633102797305795,-0.7445683901031763,0.6433070843928358,"protected_div(add(add(multiply(d, c), a), add(e, e)), protected_sqrt(add(add(e, b), subtract(b, a))))"
