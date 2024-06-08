@@ -42,44 +42,6 @@ def save_tokenized_data(df):
             f.write(" ".join(line) + "\n")
 
 
-def process_six_words_data():
-    sentence = []
-    with open(f"{PATH}/data/tokenized_mnh.txt", "r") as f:
-        for lines in f.readlines():
-            if len(lines.split()) == 6:
-                sentence.append(lines)
-
-    # Shuffle the sentences
-    random.shuffle(sentence)
-
-    # Save the dataset of six words
-    with open(f"{PATH}/data/six_words.txt", "w") as f:
-        for lines in sentence:
-            f.write(lines)
-
-    # Save the testing data
-    os.makedirs(f"{PATH}/data/test", exist_ok=True)
-    with open(f"{PATH}/data/test/testing.txt", "w") as f:
-        for lines in sentence[:10000]:
-            f.write(lines)
-
-    # Save the traing data
-    os.makedirs(f"{PATH}/data/train", exist_ok=True)
-    with open(f"{PATH}/data/train/training.txt", "w") as f:
-        for lines in sentence[10000:]:
-            f.write(lines)
-
-    # Partition the training data
-    # os.makedirs(f"{PATH}/data/train", exist_ok=True)
-    # for lines in sentence[10000:]:
-    #     partition_idx = hash(lines) % 100
-    #     with open(f"{PATH}/data/train/partition_{partition_idx}.txt", "a") as f:
-    #         f.write(lines)
-    # print("Partitioning done!")
-
-    return None
-
-
 def train_word2vec_model(df, dim):
     # Tokenize the text
     sentences = df["headline_text"].apply(preprocess_text).tolist()
