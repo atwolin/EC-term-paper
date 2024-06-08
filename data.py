@@ -14,6 +14,44 @@ PATH = re.search(r"(.*EC-term-paper)", cur_path).group(0)
 # print(PATH)
 
 
+def process_six_words_data():
+    sentence = []
+    with open(f"{PATH}/data/tokenized_mnh.txt", "r") as f:
+        for lines in f.readlines():
+            if len(lines.split()) == 6:
+                sentence.append(lines)
+
+    # Shuffle the sentences
+    random.shuffle(sentence)
+
+    # Save the dataset of six words
+    with open(f"{PATH}/data/six_words.txt", "w") as f:
+        for lines in sentence:
+            f.write(lines)
+
+    # Save the testing data
+    os.makedirs(f"{PATH}/data/test", exist_ok=True)
+    with open(f"{PATH}/data/test/testing.txt", "w") as f:
+        for lines in sentence[:10000]:
+            f.write(lines)
+
+    # Save the traing data
+    os.makedirs(f"{PATH}/data/train", exist_ok=True)
+    with open(f"{PATH}/data/train/training.txt", "w") as f:
+        for lines in sentence[10000:]:
+            f.write(lines)
+
+    # Partition the training data
+    # os.makedirs(f"{PATH}/data/train", exist_ok=True)
+    # for lines in sentence[10000:]:
+    #     partition_idx = hash(lines) % 100
+    #     with open(f"{PATH}/data/train/partition_{partition_idx}.txt", "a") as f:
+    #         f.write(lines)
+    # print("Partitioning done!")
+
+    return None
+
+
 def load_model(dim):
     """
     load the trained models
@@ -83,6 +121,7 @@ def get_embeddings(model, dim, partition=1):
     # print("data: ", data[0][1])
     count = 0
     embeddings = {}
+    embedding_model = None
     for line in data[0]:
         for word in line.split():
             if count < 5:
@@ -91,19 +130,22 @@ def get_embeddings(model, dim, partition=1):
                 count += 1
             if model == "word2vec" and word in word2vec_model.wv:
                 embeddings[word] = word2vec_model.wv[word]
+                embedding_model = word2vec_model
                 # print(f"word: {word}, vector: {word2vec_model.wv[word]}")
             elif model == "glove" and word in glove_model:
                 embeddings[word] = glove_model[word]
+                embedding_model = glove_model
             elif model == "fasttext" and word in fastText_model:
                 embeddings[word] = fastText_model.get_word_vector(word)
+                embedding_model = fastText_model
             else:
                 # embeddings[word] = (
                 #     word2vec_model.wv[word],
                 #     glove_model[word],
                 #     fastText_model.get_word_vector(word),
                 # )
-                similar_word = [word2vec_model.wv.most_similar(word, topn=1)][0][0][0]
-                embeddings[word] = word2vec_model.wv[similar_word]
+#                 similar_word = [word2vec_model.wv.most_similar(word, topn=1)][0][0][0]
+#                 embeddings[word] = word2vec_model.wv[similar_word]
                 #print(f"word: {word}, vector: {embeddings[word]}")
     # print("embeddings: ", embeddings[data[0][1]])
     if model == "word2vec":
@@ -114,6 +156,7 @@ def get_embeddings(model, dim, partition=1):
         return_model = fastText_model
 
     return data, embeddings, return_model
+
 
 
 if __name__ == "__main__":
