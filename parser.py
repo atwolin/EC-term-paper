@@ -14,6 +14,7 @@ class Config:
         num_generations,
         num_evaluations,
         debug,
+        run
     ):
         self.algorithm = algorithm
         self.embedding_type = embedding_type
@@ -25,6 +26,7 @@ class Config:
         self.num_generations = num_generations
         self.num_evaluations = num_evaluations
         self.debug = debug
+        self.run = run
 
     def print_configuration(self):
         parameters = {
@@ -146,4 +148,5 @@ def parse_arguments():
         num_generations=args.generations,
         num_evaluations=args.evaluations,
         debug=args.debug,
+        run=1
     )

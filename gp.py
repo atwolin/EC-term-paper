@@ -446,6 +446,7 @@ class GP:
         #print(f"csv_:{self.csv_name()}")
         csv_name = self.csv_name()
         os.makedirs(f"{PATH}/results", exist_ok=True)
+        #print(f"csv_name: {csv_name},run:{self.run}")
         
         with open(f"{PATH}/results/{csv_name}.csv", "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
