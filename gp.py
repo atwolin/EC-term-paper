@@ -420,10 +420,27 @@ class GP:
         row = [self.eval_count] + list(record.values()) + [best_ind]
         writer.writerow(row)
 
+    def csv_name(self):
+        return '*'.join([
+            '-algo', self.algorithm,
+            '-e', self.embedding_type,
+            '-n', str(self.dim),
+            '-p', str(self.pop_size),
+            '-pc', str(self.cx_pb),
+            '-pm', str(self.mut_pb),
+            '-g', str(self.max_gen),
+            '-c', str(self.cx_method),
+            '-eval', str(self.max_eval),
+        ])
+
+
     def evolving(self):
         print("Start evolving...")
+        #print(f"csv_:{self.csv_name()}")
+        csv_name = self.csv_name()
         os.makedirs(f"{PATH}/results", exist_ok=True)
-        with open(f"{PATH}/results/{self.algorithm}.csv", "w", newline="") as csvfile:
+        
+        with open(f"{PATH}/results/{csv_name}.csv", "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(
                 ["eval_count", "avg", "std", "min", "max", "best_individual"]
