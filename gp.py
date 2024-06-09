@@ -51,6 +51,46 @@ def protected_sqrt(x):
     return np.sqrt(x)
 
 
+def get_X(trees):
+    X_list = np.array(
+        [
+            np.array([trees.embeddings[char] for char in words])
+            for words in trees.inputword
+        ]
+    )
+    return X_list
+
+
+def get_predict_vec(trees, individual):
+    func = gp.compile(individual, trees.pset)
+    y_pred_list = np.array(
+        [
+            func(*np.array([trees.embeddings[char] for char in words]))
+            for words in trees.inputword
+        ]
+    )
+    return y_pred_list
+
+
+def get_y(trees):
+    y_true_list = np.array(
+        np.array([trees.embeddings[char] for char in trees.realword])
+    )
+    return y_true_list
+
+
+def get_predict_word(y_pred_vec, embedding_type, embedding_model):
+    if embedding_type == "word2vec":
+        y_pred_word = embedding_model.wv.similar_by_vector(y_pred_vec, topn=1)
+        return y_pred_word[0][0]
+    elif embedding_type == "glove":
+        y_pred_word = embedding_model.similar_by_vector(y_pred_vec, topn=1)
+        return y_pred_word[0][0]
+    else:  # embedding_type == "fasttext"
+        y_pred_word = embedding_model.get_nearest_neighbors(y_pred_vec)
+        return y_pred_word[0][1]
+
+
 class GP:
     def __init__(
         self,
@@ -141,9 +181,9 @@ class GP:
         self.hof = tools.HallOfFame(10)  # hall of fame size
 
     def initialize_pop(self):
-        if 'FitnessMax' in creator.__dict__:
+        if "FitnessMax" in creator.__dict__:
             del creator.FitnessMax
-        if 'Individual' in creator.__dict__:
+        if "Individual" in creator.__dict__:
             del creator.Individual
         self.register()
         self.pop = self.toolbox.population(n=self.pop_size)
@@ -401,14 +441,14 @@ class GP:
             parents, key=lambda ind: ind.fitness.values
         )  # 小到大排序
         sorted_fitness = [ind.fitness.values for ind in sorted_parents]
-        #print(f"sorted_fitness: {sorted_fitness}")
+        # print(f"sorted_fitness: {sorted_fitness}")
         offspring = self.crossover(sorted_parents[1], sorted_parents[2])
         offspring = self.mutate(offspring)
         off_fit = self.toolbox.evaluate(offspring)
-        #print(f"offspring fitness: {off_fit}")
+        # print(f"offspring fitness: {off_fit}")
         if off_fit[0] >= sorted_fitness[0]:
             idx = self.pop.index(sorted_parents[0])
-            #print(idx)
+            # print(idx)
             self.pop[idx] = offspring
             # print(f"Ater selection: {self.pop[idx]}")
             # print(off_fit[0])
@@ -417,37 +457,48 @@ class GP:
         return
 
     def write_record(self, writer):
-        print(f"Eval iteration: {self.eval_count}")
+        # print(f"Eval iteration: {self.eval_count}")
         record = self.stats.compile(self.pop)
         self.hof.update(self.pop)
-        print(record)
-        print(f"Best ind: {self.hof[0]}")
+        # print(record)
+        # print(f"Best ind: {self.hof[0]}")
         best_ind = str(self.hof[0])
         row = [self.eval_count] + list(record.values()) + [best_ind]
         writer.writerow(row)
 
     def csv_name(self):
-        return '*'.join([
-            '-algo', self.algorithm,
-            '-e', self.embedding_type,
-            '-n', str(self.dim),
-            '-p', str(self.pop_size),
-            '-pc', str(self.cx_pb),
-            '-pm', str(self.mut_pb),
-            '-g', str(self.max_gen),
-            '-c', str(self.cx_method),
-            '-eval', str(self.max_eval),
-            '-run', str(self.run)
-        ])
-
+        return "*".join(
+            [
+                "-algo",
+                self.algorithm,
+                "-e",
+                self.embedding_type,
+                "-n",
+                str(self.dim),
+                "-p",
+                str(self.pop_size),
+                "-pc",
+                str(self.cx_pb),
+                "-pm",
+                str(self.mut_pb),
+                "-g",
+                str(self.max_gen),
+                "-c",
+                str(self.cx_method),
+                "-eval",
+                str(self.max_eval),
+                "-run",
+                str(self.run),
+            ]
+        )
 
     def evolving(self):
         print("Start evolving...")
-        #print(f"csv_:{self.csv_name()}")
+        # print(f"csv_:{self.csv_name()}")
         csv_name = self.csv_name()
         os.makedirs(f"{PATH}/results", exist_ok=True)
-        #print(f"csv_name: {csv_name},run:{self.run}")
-        
+        # print(f"csv_name: {csv_name},run:{self.run}")
+
         with open(f"{PATH}/results/{csv_name}.csv", "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(

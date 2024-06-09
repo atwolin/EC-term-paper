@@ -65,7 +65,9 @@ def load_model(dim):
     glove_model = load_glove(f"{PATH}/model/glove/vectors.{dim}.txt")
 
     # FastText model
-    fastText_model = fasttext.load_model(f"{PATH}/model/fasttext/fastText.model.{dim}.bin")
+    fastText_model = fasttext.load_model(
+        f"{PATH}/model/fasttext/fastText.model.{dim}.bin"
+    )
 
     return word2vec_model, glove_model, fastText_model
 
@@ -81,6 +83,30 @@ def get_training_dataset():
     data = df.iloc[idx]
 
     return data
+
+
+def get_testing_dataset(model, dim):
+    """
+    To get a subset of a larger dataset from a text file
+    :return: a sub-dataset
+    """
+    # Load the trained models
+    word2vec_model, glove_model, fastText_model = load_model(dim)
+
+    data = pd.read_csv(f"{PATH}/data/test/testing.txt", sep="\t", header=None)
+
+    # Get embeddings
+    embeddings = {}
+    for line in data[0]:
+        for word in line.split():
+            if model == "word2vec":
+                embeddings[word] = word2vec_model.wv[word]
+            elif model == "glove":
+                embeddings[word] = glove_model[word]
+            else:  # model == "fasttext" and word in fastText_model:
+                embeddings[word] = fastText_model.get_word_vector(word)
+
+    return data, embeddings
 
 
 def get_embeddings(model, dim):
