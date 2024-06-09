@@ -133,7 +133,6 @@ def parse_arguments():
         action="store_true",
         help="Turn on debug prints (default: false)",
     )
-
     args = parser.parse_args()
 
     return Config(

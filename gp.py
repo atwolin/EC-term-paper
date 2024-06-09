@@ -65,6 +65,7 @@ class GP:
         num_evaluations,
         data,
         embeddings,
+        run,
     ):
         self.algorithm = algorithm
         self.embedding_type = embedding_type
@@ -79,6 +80,7 @@ class GP:
         self.inputword = data[0].str.split(" ").apply(lambda x: x[:5])
         self.realword = data[0].str.split(" ").str.get(5)
         self.embeddings = embeddings
+        self.run = run
 
         self.pop = None
         self.n_gen = 0
@@ -139,6 +141,10 @@ class GP:
         self.hof = tools.HallOfFame(10)  # hall of fame size
 
     def initialize_pop(self):
+        if 'FitnessMax' in creator.__dict__:
+            del creator.FitnessMax
+        if 'Individual' in creator.__dict__:
+            del creator.Individual
         self.register()
         self.pop = self.toolbox.population(n=self.pop_size)
         fitnesses = map(self.toolbox.evaluate, self.pop)
@@ -431,6 +437,7 @@ class GP:
             '-g', str(self.max_gen),
             '-c', str(self.cx_method),
             '-eval', str(self.max_eval),
+            '-run', str(self.run)
         ])
 
 

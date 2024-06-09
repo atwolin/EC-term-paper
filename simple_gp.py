@@ -25,6 +25,7 @@ def run_trail(Config):
         Config.num_evaluations,
         data,
         embeddings,
+        Config.run,
     )
     simple_gp.initialize_pop()
     simple_gp.evolving()
@@ -33,5 +34,7 @@ def run_trail(Config):
 
 
 def simple_gp(config):
-    run_trail(config)
+    for i in range(30):
+        config.run = i + 1
+        run_trail(config)
     return
