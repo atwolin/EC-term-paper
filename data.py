@@ -65,7 +65,7 @@ def load_model(dim):
     glove_model = load_glove(f"{PATH}/model/glove/vectors.{dim}.txt")
 
     # FastText model
-    fastText_model = fasttext.load_model(f"{PATH}/model/fasttext/fasttext.{dim}.bin")
+    fastText_model = fasttext.load_model(f"{PATH}/model/fasttext/fastText.model.{dim}.bin")
 
     return word2vec_model, glove_model, fastText_model
 
