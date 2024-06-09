@@ -4,7 +4,7 @@
 ALGORITHM="simple_gp"
 POP_SIZE=500
 CX_METHOD="cx_simple"
-MAX_EVAL=100000
+MAX_EVAL=20000
 EMBEDDING_TYPE="word2vec"
 
 # Baseline

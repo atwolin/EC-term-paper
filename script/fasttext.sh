@@ -2,9 +2,9 @@
 
 # Parameters
 ALGORITHM="simple_gp"
-POP_SIZE=3
+POP_SIZE=500
 CX_METHOD="cx_simple"
-MAX_EVAL=10
+MAX_EVAL=20000
 EMBEDDING_TYPE="fasttext"
 
 # Baseline
