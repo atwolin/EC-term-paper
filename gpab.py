@@ -38,6 +38,7 @@ def run_trail(Config):
     ensemble = []  # Ensemble to store the best individuals
 
     gpab = gp.GP(
+        Config.algorithm,
         Config.embedding_type,
         Config.dimension,
         Config.population_size,
@@ -48,14 +49,17 @@ def run_trail(Config):
         Config.num_evaluations,
         data,
         embeddings,
+        Config.run,
     )
     gpab.initialize_pop()
 
-    boosting(gpab)
+    boosting(gpab, boosting_interval)
 
     return
 
 
-def simple_gp(config):
-    run_trail(config)
+def gpab(config):
+    for run in range(30):
+        config.run = run + 1
+        run_trail(config)
     return

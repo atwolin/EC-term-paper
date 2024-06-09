@@ -13,7 +13,7 @@ EMBEDDING_TYPE="word2vec"
 # python main.py -algo $ALGORITHM -e $EMBEDDING_TYPE -n $DIM -p $POP_SIZE -pc 1 -pm 0 -g $MAX_GEN -c $CX_METHOD -eval $MAX_EVAL
 
 # Running experiments
-for PC in 0 0.1 0.5 0.9
+for PC in 1 0 0.1 0.5 0.9
 do
     for PM in 0 0.01 0.03 0.05 0.1 0.5
     do

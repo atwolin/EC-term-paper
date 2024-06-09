@@ -21,6 +21,7 @@ def planting_rf(dataset, Config, embeddings, cx_method):
         Config.num_evaluations,
         sub_dataset,
         embeddings,
+        Config.run,
     )
 
     one_rf.initialize_pop()
@@ -40,7 +41,7 @@ def run_trail(Config):
     num_pick_best = 10  # Number of best individuals to pick from one forest
     archive = []  # Archive to store the best individuals
 
-    for i in range(num_archive / num_pick_best):
+    for i in range(num_archive // num_pick_best):
         one_rf = planting_rf(data, Config, embeddings, cx_method)
         top = sorted(one_rf.pop, key=lambda x: x.fitness.values, reverse=True)[:10]
         archive.append(top)
@@ -49,5 +50,7 @@ def run_trail(Config):
 
 
 def random_forest(config):
-    run_trail(config)
+    for run in range(30):
+        config.run = run + 1
+        run_trail(config)
     return
