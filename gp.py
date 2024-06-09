@@ -330,7 +330,9 @@ class GP:
 
         return ind1, ind2
 
-    def crossover(self, ind1, ind2):
+    def crossover(self, ind1_, ind2_):
+        ind1 = copy.deepcopy(ind1_)
+        ind2 = copy.deepcopy(ind2_)
         # No crossover on single node tree
         if len(ind1) < 2 or len(ind2) < 2:
             return ind1, ind2
@@ -373,9 +375,9 @@ class GP:
         fitness_ind1 = self.toolbox.evaluate(ind1)
         fitness_ind2 = self.toolbox.evaluate(ind2)
         if fitness_ind1 <= fitness_ind2:
-            return ind1
-        else:
             return ind2
+        else:
+            return ind1
 
     def mutate(self, child):
         if random.random() < self.mut_pb:
@@ -393,12 +395,14 @@ class GP:
             parents, key=lambda ind: ind.fitness.values
         )  # 小到大排序
         sorted_fitness = [ind.fitness.values for ind in sorted_parents]
+        #print(f"sorted_fitness: {sorted_fitness}")
         offspring = self.crossover(sorted_parents[1], sorted_parents[2])
         offspring = self.mutate(offspring)
         off_fit = self.toolbox.evaluate(offspring)
+        #print(f"offspring fitness: {off_fit}")
         if off_fit[0] >= sorted_fitness[0]:
-            idx = self.pop.index(candidates[0])
-            # print(self.pop[idx])
+            idx = self.pop.index(sorted_parents[0])
+            #print(idx)
             self.pop[idx] = offspring
             # print(f"Ater selection: {self.pop[idx]}")
             # print(off_fit[0])
