@@ -115,6 +115,30 @@ def get_testing_embeddings(model, dim):
     return data, embeddings, embedding_model
 
 
+def get_testing_dataset(model, dim):
+    """
+    To get a subset of a larger dataset from a text file
+    :return: a sub-dataset
+    """
+    # Load the trained models
+    word2vec_model, glove_model, fastText_model = load_model(dim)
+
+    data = pd.read_csv(f"{PATH}/data/test/testing.txt", sep="\t", header=None)
+
+    # Get embeddings
+    embeddings = {}
+    for line in data[0]:
+        for word in line.split():
+            if model == "word2vec":
+                embeddings[word] = word2vec_model.wv[word]
+            elif model == "glove":
+                embeddings[word] = glove_model[word]
+            else:  # model == "fasttext" and word in fastText_model:
+                embeddings[word] = fastText_model.get_word_vector(word)
+
+    return data, embeddings
+
+
 def get_embeddings(model, dim):
     """
     To get the embeddings of the words in the sub-dataset

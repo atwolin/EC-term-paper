@@ -14,7 +14,7 @@ class Config:
         num_generations,
         num_evaluations,
         debug,
-        run
+        run,
     ):
         self.algorithm = algorithm
         self.embedding_type = embedding_type
@@ -39,6 +39,7 @@ class Config:
             "mut_prob": self.mut_prob,
             "num_generations": self.num_generations,
             "num_evaluations": self.num_evaluations,
+            "num_runs": self.run,
         }
 
         print("-" * 44)
@@ -147,6 +148,6 @@ def parse_arguments():
         mut_prob=args.prob_mutation,
         num_generations=args.generations,
         num_evaluations=args.evaluations,
+        run=1,
         debug=args.debug,
-        run=1
     )
