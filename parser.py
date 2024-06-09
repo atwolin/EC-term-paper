@@ -4,6 +4,7 @@ import argparse
 class Config:
     def __init__(
         self,
+        algorithm
         embedding_type,
         dimension,
         population_size,
@@ -14,6 +15,7 @@ class Config:
         num_evaluations,
         debug,
     ):
+        self.algorithm = algorithm
         self.embedding_type = embedding_type
         self.dimension = dimension
         self.population_size = population_size
@@ -26,6 +28,7 @@ class Config:
 
     def print_configuration(self):
         parameters = {
+            "algorithm": self.algorithm,
             "embedding_type": self.embedding_type,
             "dimension": self.dimension,
             "population_size": self.population_size,
@@ -54,7 +57,14 @@ def str_to_bool(v):
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="GA Configuration Parser")
+    parser = argparse.ArgumentParser(description="GP Configuration Parser")
+    parser.add_argument(
+        "-algo",
+        "--algorithm",
+        choices=["simple_gp", "rf", "gpab"],
+        default="simple_gp",
+        help="The algorithm to use. simple_gp, rf, or gpab (default: simple_gp)",
+    )
     parser.add_argument(
         "-e",
         "--embedding_type",
@@ -127,6 +137,7 @@ def parse_arguments():
     args = parser.parse_args()
 
     return Config(
+        algorithm=args.algorithm,
         embedding_type=args.embedding_type,
         dimension=args.dimension,
         population_size=args.population_size,

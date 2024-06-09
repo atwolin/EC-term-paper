@@ -54,6 +54,7 @@ def protected_sqrt(x):
 class GP:
     def __init__(
         self,
+        algorithm,
         embedding_type,
         dimension,
         population_size,
@@ -65,6 +66,7 @@ class GP:
         data,
         embeddings,
     ):
+        self.algorithm = algorithm
         self.embedding_type = embedding_type
         self.dim = dimension
         self.pop_size = population_size
@@ -417,7 +419,7 @@ class GP:
     def evolving(self):
         print("Start evolving...")
         os.makedirs(f"{PATH}/results", exist_ok=True)
-        with open(f"simple.gp.{self.dim}.csv", "w", newline="") as csvfile:
+        with open(f"{PATH}/results/{self.algorithm}.csv", "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(
                 ["eval_count", "avg", "std", "min", "max", "best_individual"]
