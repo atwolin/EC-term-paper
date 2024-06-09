@@ -14,6 +14,7 @@ def run_trail(Config):
     cx_method = gp.get_cx_num(Config.crossover_method)
 
     simple_gp = gp.GP(
+        Config.algorithm,
         Config.embedding_type,
         Config.dimension,
         Config.population_size,
