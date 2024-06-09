@@ -1,0 +1,4 @@
+eval_count,avg,std,min,max,best_individual
+9,0.15360549473726998,0.12115012023130094,0.03313720032766452,0.38581999470492,"protected_div(e, square(protected_sqrt(c)))"
+13,0.2622653049218293,0.18901070081301172,0.09484938137462162,0.576436251250461,"protected_div(protected_sqrt(b), protected_div(b, protected_sqrt(b)))"
+17,0.3153806653658173,0.1786698063356123,0.09484938137462162,0.576436251250461,"protected_div(protected_sqrt(b), protected_div(b, protected_sqrt(b)))"

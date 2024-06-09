@@ -1,0 +1,4 @@
+eval_count,avg,std,min,max,best_individual
+9,0.1846637609389,0.18912934473969722,0.0221991722802895,0.5539091285907846,"add(add(add(e, b), protected_sqrt(c)), square(square(c)))"
+13,0.27934075258969704,0.2278279915505173,0.0221991722802895,0.5539091285907846,"add(add(add(e, b), protected_sqrt(c)), square(square(c)))"
+17,0.32603680043870875,0.21677789731373792,0.0221991722802895,0.5539091285907846,"add(add(add(e, b), protected_sqrt(c)), square(square(c)))"

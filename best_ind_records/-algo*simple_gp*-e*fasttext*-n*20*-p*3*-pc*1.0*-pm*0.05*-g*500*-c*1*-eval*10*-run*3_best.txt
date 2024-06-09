@@ -1,0 +1,2 @@
+Best fitness: 0.692864762464906
+Best individual: add(e, b)

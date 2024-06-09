@@ -1,0 +1,2 @@
+Best fitness: 0.7907384432916473
+Best individual: multiply(add(c, e), protected_div(d, d))

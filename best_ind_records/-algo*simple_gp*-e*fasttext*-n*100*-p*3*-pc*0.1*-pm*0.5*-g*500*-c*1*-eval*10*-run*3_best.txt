@@ -1,0 +1,2 @@
+Best fitness: 0.4799167104163122
+Best individual: multiply(a, protected_sqrt(e))
