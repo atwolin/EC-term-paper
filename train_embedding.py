@@ -81,7 +81,7 @@ if __name__ == "__main__":
     # fastText_model = train_fasttext_model(data, dim)
     # print("Finish training the models.\n")
 
-    # Test the model
+    # Test models
     # test_word = "australia"
     # print(f"vector for word2vec: {word2vec_model.wv[test_word]}")
     # if test_word in glove_vectors:

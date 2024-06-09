@@ -1,19 +1,43 @@
-import fasttext
+import os
+import re
+import operator
+import random
+import copy
+import csv
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
 from deap import creator, base, tools, algorithms
-import operator
 import deap.gp as gp
 from deap.gp import PrimitiveSet, genGrow
-import csv
+from deap.gp import cxOnePoint as cx_simple
+from data import get_embeddings
 
-# import math
-import random
-import copy
-from data import get_embeddings, load_model
+cur_path = os.getcwd()
+PATH = re.search(r"(.*EC-term-paper)", cur_path).group(0)
+# print(PATH)
+
+CX_RANDOM = 0
+CX_SIMPLE = 1
+CX_UNIFORM = 2
+CX_FAIR = 3
+CX_ONE_POINT = 4
+
+
+def get_cx_num(crossover_method):
+    if crossover_method == "cx_random":
+        cx_num = CX_RANDOM
+    elif crossover_method == "cx_simple":
+        cx_num = CX_SIMPLE
+    elif crossover_method == "cx_uniform":
+        cx_num = CX_UNIFORM
+    elif crossover_method == "cx_fair":
+        cx_num = CX_FAIR
+    else:  # crossover_method == "cx_one_point"
+        cx_num = CX_ONE_POINT
+    return cx_num
 
 
 def protected_div(x, y):
@@ -28,56 +52,72 @@ def protected_sqrt(x):
 
 
 class GP:
-    def __init__(self, embedding_model, pop_size, dim, cx_method, mut_pb, cx_pb, n_gen, data, embeddings, x, y):
-        self.embeddings_model = embedding_model
-        self.pop_size = pop_size
-        self.dim = dim
-        self.cx_method = cx_method
-        self.mut_pb = mut_pb
-        self.cx_pb = cx_pb
-        self.n_gen = n_gen
-        self.pop = None
+    def __init__(
+        self,
+        algorithm,
+        embedding_type,
+        dimension,
+        population_size,
+        crossover_method,
+        cross_prob,
+        mut_prob,
+        num_generations,
+        num_evaluations,
+        data,
+        embeddings,
+    ):
+        self.algorithm = algorithm
+        self.embedding_type = embedding_type
+        self.dim = dimension
+        self.pop_size = population_size
+        self.cx_method = crossover_method
+        self.cx_pb = cross_prob
+        self.mut_pb = mut_prob
+        self.max_gen = num_generations
+        self.max_eval = num_evaluations
         self.data = data
+        self.inputword = data[0].str.split(" ").apply(lambda x: x[:5])
+        self.realword = data[0].str.split(" ").str.get(5)
         self.embeddings = embeddings
-        self.inputword = x
-        self.realword = y
+
+        self.pop = None
+        self.n_gen = 0
         self.eval_count = 0
 
     def register(self):
-        # 定義算術表達式的原語集（Primitive Set）
+        # Function set
         self.pset = gp.PrimitiveSet("MAIN", 5)
         self.pset.addPrimitive(np.add, 2)
         self.pset.addPrimitive(np.subtract, 2)
         self.pset.addPrimitive(np.multiply, 2)
-        self.pset.addPrimitive(protected_div, 2)  ##確認一次ok
-        # self.pset.addPrimitive(np.sqrt, 1)
+        self.pset.addPrimitive(protected_div, 2)
         self.pset.addPrimitive(protected_sqrt, 1)
         self.pset.addPrimitive(np.square, 1)
+
+        # Terminal set
         self.pset.renameArguments(ARG0="a", ARG1="b", ARG2="c", ARG3="d", ARG4="e")
-        # print("Attributes of gp.PrimitiveSet:", dir(self.pset))
-        # 創建適應度類和個體類
+
+        # Create the fitness and individual classes
         creator.create("FitnessMax", base.Fitness, weights=(1,))
         creator.create(
             "Individual", gp.PrimitiveTree, fitness=creator.FitnessMax, pset=self.pset
-        )  # output不算fitness
-        # creator.create("Individual", gp.PrimitiveTree) #output不算fitness
-        # 初始化工具箱
+        )
+
+        # Initialize the toolbox
         self.toolbox = base.Toolbox()
         self.toolbox.register("expr", gp.genHalfAndHalf, pset=self.pset, min_=1, max_=5)
-        # self.toolbox.register("individual", creator.Individual, fitness=creator.FitnessMax, expr=self.toolbox.expr) #gene_gen=toolbox.gene_gen, n_genes=n_genes
         self.toolbox.register(
             "individual", tools.initIterate, creator.Individual, self.toolbox.expr
-        )  # gene_gen=toolbox.gene_gen, n_genes=n_genes
+        )
         self.toolbox.register(
             "population",
             tools.initRepeat,
             list,
             self.toolbox.individual,
             n=self.pop_size,
-        )  # population數ok
-        # 註冊operators
+        )
         self.toolbox.register("select", tools.selRandom, k=3)
-        self.toolbox.register("cx_simple", gp.cxOnePoint)  # simple crossover
+        self.toolbox.register("cx_simple", cx_simple)
         self.toolbox.register("cx_uniform", self.cx_uniform)
         self.toolbox.register("cx_fair", self.cx_fair)
         self.toolbox.register("cx_one", self.cxOnePoint)
@@ -89,30 +129,25 @@ class GP:
             "mutate", gp.staticLimit(operator.attrgetter("height"), max_value=5)
         )
         self.toolbox.register("evaluate", self.evaluate)  #
-        # self.toolbox.register("compile", gep.compile_, pset=self.pset)
-        # 註冊record工具
-        self.stats = tools.Statistics(
-            key=lambda ind: ind.fitness.values
-        )  #!!!ind: ind.fitness.values[0] fitness???
+
+        # Record for analysis
+        self.stats = tools.Statistics(key=lambda ind: ind.fitness.values)
         self.stats.register("avg", np.mean)
         self.stats.register("std", np.std)
         self.stats.register("min", np.min)
         self.stats.register("max", np.max)
-        self.hof = tools.HallOfFame(10) #hall of fame size
-
-        # print("reg done!")
+        self.hof = tools.HallOfFame(10)  # hall of fame size
 
     def initialize_pop(self):
         self.register()
-        # print(self.pop_size)
         self.pop = self.toolbox.population(n=self.pop_size)
-        # evaluate the entire population
         fitnesses = map(self.toolbox.evaluate, self.pop)
         for ind, fit in zip(self.pop, fitnesses):
             ind.fitness.values = fit
 
     def subtree_height(self, tree, index):
-        # """Calculate the height of the subtree starting at the given index."""
+        """Calculate the height of the subtree starting at the given index."""
+
         def _height(node_index):
             node = tree[node_index]
             if node.arity == 0:  # Leaf node
@@ -124,6 +159,7 @@ class GP:
                         node_index + 1, node_index + 1 + node.arity
                     )
                 )
+
         return _height(index)
 
     def searchSubtree_idx(self, tree, begin):
@@ -141,32 +177,21 @@ class GP:
 
     def evaluate(self, individual):
         """Evalute the fitness of an individual"""
-        # print(f"individual種類:{type(individual)}")
         func = gp.compile(individual, self.pset)
         total_similarity = 0.0
         for data_index in range(len(self.inputword)):
             words = self.inputword.iloc[data_index]
             in_vectors = [self.embeddings[word] for word in words]
             a, b, c, d, e = in_vectors[:5]
-            #print(f"in_vectors: {in_vectors}")
+            # print(f"in_vectors: {in_vectors}")
             y = self.realword.iloc[data_index]
-            #print(f"y: {y}")
+            # print(f"y: {y}")
             out_vector = self.embeddings[y]
-            #print(f"out_vector: {out_vector}")
-            #if out_vector.ndim == 3:
-                #out_vector = out_vector.reshape(1, -1)
+            # print(f"out_vector: {out_vector}")
+            # if out_vector.ndim == 3:
+            # out_vector = out_vector.reshape(1, -1)
 
             predict = self.clean_data(func(a, b, c, d, e))
-            #print(predict)
-            # if isinstance(predict, tuple):
-            #     predict = np.array(predict)
-            #     print(predict)
-            # if predict.ndim == 3:
-            #     print(predict)
-            #     predict = predict.reshape(1, -1)
-
-            #print("predict after clean:", np.array(predict).shape)
-            #print("Shape of out_vector:", np.array(out_vector).shape)
 
             similarity = cosine_similarity([predict], [out_vector])[0][0]
             total_similarity += similarity
@@ -176,14 +201,8 @@ class GP:
         return (fitness,)
 
     def cx_uniform(self, ind1, ind2):
-
-        if len(ind1) < 2 or len(ind2) < 2:
-            # No crossover on single node tree
-            return ind1, ind2
-
         child = type(ind1)([])
         parents = [ind1, ind2]
-        # print(f"parents種類：{type(parents)}")
         flag0, flag1 = 0, 0
         # p0 = parents[0].searchSubtree(0)
         # p1 = parents[1].searchSubtree(0)
@@ -227,11 +246,6 @@ class GP:
         return parents[r], parents[r]
 
     def cx_fair(self, ind1, ind2):
-
-        if len(ind1) < 2 or len(ind2) < 2:
-            # No crossover on single node tree
-            return ind1, ind2
-
         # List all available primitive types in each individual
         types1 = gp.defaultdict(list)
         types2 = gp.defaultdict(list)
@@ -263,7 +277,6 @@ class GP:
         ind1[slice1], ind2[slice2] = ind2[slice2], ind1[slice1]
         return ind1, ind2
 
-
     def traverse_tree(self, stack, res, parent, idx):
         while res != 0:
             res -= 1
@@ -273,8 +286,6 @@ class GP:
         return stack, res, idx
 
     def cxOnePoint(self, ind1, ind2):
-        #print(f"ind1: {ind1.__str__()}\n, ind2: {ind2.__str__()}")
-
         idx1 = 0
         idx2 = 0
         # To track the trees
@@ -309,21 +320,23 @@ class GP:
         # Select crossover point
         if len(region1) > 0:
             point = random.randint(0, len(region1) - 1)
-        # print(f"crossover point: {point}")
-        # print(f"crossover point for trees: {region1[point]}, {region2[point]}")
+            # print(f"crossover point: {point}")
+            # print(f"crossover point for trees: {region1[point]}, {region2[point]}")
 
-        # Swap subtrees
-        if len(region1) > 0:
+            # Swap subtrees
             slice1 = ind1.searchSubtree(region1[point][1])
             slice2 = ind2.searchSubtree(region2[point][1])
             ind1[slice1], ind2[slice2] = ind2[slice2], ind1[slice1]
 
         return ind1, ind2
 
-
     def crossover(self, ind1, ind2):
+        # No crossover on single node tree
+        if len(ind1) < 2 or len(ind2) < 2:
+            return ind1, ind2
+        # Crossover
         if random.uniform(0, 1) < self.cx_pb:
-            if self.cx_method == 5:
+            if self.cx_method == CX_RANDOM:
                 choice = random.choice(
                     [
                         self.toolbox.cx_simple,
@@ -333,28 +346,27 @@ class GP:
                     ]
                 )
                 try:
-                    ind1, ind2 = choice( ind1, ind2)
+                    ind1, ind2 = choice(ind1, ind2)
                 except:
                     pass
-            #print(f"choice:{choice}")
-            if self.cx_method == 1:
+            if self.cx_method == CX_SIMPLE:
                 try:
-                    ind1, ind2 = self.toolbox.cx_simple( ind1, ind2)
+                    ind1, ind2 = self.toolbox.cx_simple(ind1, ind2)
                 except:
                     pass
-            if self.cx_method == 2:
+            if self.cx_method == CX_UNIFORM:
                 try:
-                    ind1, ind2 = self.toolbox.cx_uniform( ind1, ind2)
+                    ind1, ind2 = self.toolbox.cx_uniform(ind1, ind2)
                 except:
                     pass
-            if self.cx_method == 3:
+            if self.cx_method == CX_FAIR:
                 try:
-                    ind1, ind2 = self.toolbox.cx_fair( ind1, ind2)
+                    ind1, ind2 = self.toolbox.cx_fair(ind1, ind2)
                 except:
                     pass
-            if self.cx_method == 4:
+            if self.cx_method == CX_ONE_POINT:
                 try:
-                    ind1, ind2 = self.toolbox.cx_one( ind1, ind2)
+                    ind1, ind2 = self.toolbox.cx_one(ind1, ind2)
                 except:
                     pass
 
@@ -377,85 +389,42 @@ class GP:
     def select(self):
         candidates = self.toolbox.select(self.pop)
         parents = candidates[0:3]
-        sorted_parents = sorted(parents, key=lambda ind: ind.fitness.values) #小到大排序
+        sorted_parents = sorted(
+            parents, key=lambda ind: ind.fitness.values
+        )  # 小到大排序
         sorted_fitness = [ind.fitness.values for ind in sorted_parents]
         offspring = self.crossover(sorted_parents[1], sorted_parents[2])
         offspring = self.mutate(offspring)
         off_fit = self.toolbox.evaluate(offspring)
         if off_fit[0] >= sorted_fitness[0]:
             idx = self.pop.index(candidates[0])
-            #print(self.pop[idx])
+            # print(self.pop[idx])
             self.pop[idx] = offspring
-            #print(f"篩選後的：{self.pop[idx]}")
-            #print(off_fit[0])
+            # print(f"Ater selection: {self.pop[idx]}")
+            # print(off_fit[0])
             self.pop[idx].fitness.values = self.toolbox.evaluate(offspring)
-        return   
-    
+
+        return
 
     def write_record(self, writer):
-        print(f"ＥＶＡＬ次數：{self.eval_count}")
+        print(f"Eval iteration: {self.eval_count}")
         record = self.stats.compile(self.pop)
         self.hof.update(self.pop)
         print(record)
-        print(f"最佳個體：{self.hof[0]}")
+        print(f"Best ind: {self.hof[0]}")
         best_ind = str(self.hof[0])
         row = [self.eval_count] + list(record.values()) + [best_ind]
         writer.writerow(row)
-        # func_best = gp.compile(self.hof[0], self.pset)
-        # a, b, c, d ,e = [self.embeddings[word] for word in self.inputword.iloc[1]]
-        # predict_out = func_best(a, b, c, d, e)
-        # print(f"預測結果：{predict_out}")
-        # if self.embeddings_model == "word2vec":
-        #     outword = model.wv.most_similar(positive=[predict_out], topn=1)
-        # elif self.embeddings_model == "glove":
-        #     outword = model.wv.most_similar(positive=[predict_out], topn=1)
-        # elif self.embeddings_model == "fasttext":
-        #     outword = model.get_nearest_neighbors(predict_out, k=1)
-        # print(f"預測結果：{outword}")
 
-
-    def evolving(self, model):
-        # for g in range(self.n_gen):
-        print("開始進化！")
-        with open('record.csv', 'w', newline='') as csvfile:
+    def evolving(self):
+        print("Start evolving...")
+        os.makedirs(f"{PATH}/results", exist_ok=True)
+        with open(f"{PATH}/results/{self.algorithm}.csv", "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow(["eval_count", "avg", "std", "min", "max", "best_individual"])
-            while self.eval_count < 1000:
+            writer.writerow(
+                ["eval_count", "avg", "std", "min", "max", "best_individual"]
+            )
+            while self.eval_count < self.max_eval:
                 self.select()
                 if self.eval_count % 1 == 0:
                     self.write_record(writer)
-               
-def get_cx_num(Config):
-    if Config.crossover_method == "cxOnePoint":
-        cx_num = 1
-    elif Config.crossover_method == "cx_uniform":
-        cx_num = 2
-    elif Config.crossover_method == "cx_fair": 
-        cx_num = 3
-    elif Config.crossover_method == "cx_one":
-        cx_num = 4
-    else:
-        cx_num = 5
-    return cx_num
-
-
-def run_GP(Config):
-    word2vec_model, glove_model, fastText_model = load_model(Config.dimension)
-    data, embeddings, model = get_embeddings(Config.embeddings, Config.dimension, 1)
-
-    x = data[0].str.split(" ").apply(lambda x: x[:5])
-    y = data[0].str.split(" ").str.get(5)
-
-    cx_num = get_cx_num(Config)
-
-    print(x.iloc[1],y.iloc[1])
-    gpp = GP(Config.embeddings, Config.population_size, Config.dimension, cx_num, Config.mut_prob, Config.cross_prob, Config.num_generations, data, embeddings, x, y)
-    gpp.initialize_pop()
-    gpp.evolving(model)
-    return
-
-# if __name__ == "__main__":
-#     seed = 1126
-#     random.seed(seed)
-#     data, embeddings = get_embeddings("word2vec", 10, 1)
-#     run_GP(30, 10, 4, 0.1, 30, data, embeddings)
