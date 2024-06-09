@@ -1,0 +1,9 @@
+eval_count,avg,std,min,max,best_individual
+55,-0.009560240142630582,0.10285257146626754,-0.259243177596613,0.27626150969168856,"subtract(protected_div(e, protected_sqrt(e)), protected_sqrt(protected_div(b, c)))"
+60,0.008208140816150008,0.1093133860541427,-0.11889768090362896,0.27626150969168856,"subtract(protected_div(e, protected_sqrt(e)), protected_sqrt(protected_div(b, c)))"
+65,0.0079809131108945,0.10953668972329626,-0.11889768090362896,0.27626150969168856,"subtract(protected_div(e, protected_sqrt(e)), protected_sqrt(protected_div(b, c)))"
+69,0.0079809131108945,0.10953668972329626,-0.11889768090362896,0.27626150969168856,"subtract(protected_div(e, protected_sqrt(e)), protected_sqrt(protected_div(b, c)))"
+74,0.007620244875063048,0.1097679070031516,-0.11889768090362896,0.27626150969168856,"subtract(protected_div(e, protected_sqrt(e)), protected_sqrt(protected_div(b, c)))"
+78,0.007620244875063048,0.1097679070031516,-0.11889768090362896,0.27626150969168856,"subtract(protected_div(e, protected_sqrt(e)), protected_sqrt(protected_div(b, c)))"
+83,0.008811681368503983,0.10739247793226557,-0.11889768090362896,0.27626150969168856,"subtract(protected_div(e, protected_sqrt(e)), protected_sqrt(protected_div(b, c)))"
+87,0.0070585545508058956,0.10830897663439294,-0.11889768090362896,0.27626150969168856,"subtract(protected_div(e, protected_sqrt(e)), protected_sqrt(protected_div(b, c)))"

@@ -11,7 +11,7 @@ if __name__ == "__main__":
     if config.debug:
         config.print_configuration()
 
-    gp_type = sys.argv[1] if len(sys.argv) > 1 else "simple_gp"
+    gp_type = sys.argv[2] if len(sys.argv) > 1 else "simple_gp"
 
     if gp_type == "simple_gp":
         simple_gp(config)
