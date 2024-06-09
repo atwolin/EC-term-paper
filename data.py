@@ -101,15 +101,19 @@ def get_embeddings(model, dim):
     embedding_model = None
     for line in data[0]:
         for word in line.split():
-            if model == "word2vec" and word in word2vec_model.wv:
+            if model == "word2vec":
                 embeddings[word] = word2vec_model.wv[word]
-                embedding_model = word2vec_model
-            elif model == "glove" and word in glove_model:
+            elif model == "glove":
                 embeddings[word] = glove_model[word]
-                embedding_model = glove_model
             else:  # model == "fasttext" and word in fastText_model:
                 embeddings[word] = fastText_model.get_word_vector(word)
-                embedding_model = fastText_model
+
+    if model == "word2vec":
+        embedding_model = word2vec_model
+    elif model == "glove":
+        embedding_model = glove_model
+    else:  # model == "fasttext":
+        embedding_model = fastText_model
 
     return data, embeddings, embedding_model
 
