@@ -77,6 +77,16 @@ def run_trail(Config):
         Config.run,
     )
 
+    print(f"Archive: {archive}")
+    file_name = "result.archive." + tree.csv_name()
+    with open(f"{Config.algorithm}/result/{file_name}.txt", "w") as f:
+        for idx, top in enumerate(archive):
+            f.write(f"Forest {idx}\n")
+            for tree in top:
+                f.write(f"{tree}\n")
+            f.write("\n")
+
+    """
     # Get the best individuals
     archive = sorted(archive, key=lambda x: x.fitness.values, reverse=True)[:5]
 
@@ -136,7 +146,7 @@ def run_trail(Config):
                 str(archive[4]),
             ]
             writer.writerow(row)
-
+    """
     return
 
 

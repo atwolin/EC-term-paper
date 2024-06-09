@@ -213,6 +213,7 @@ def run_trail(Config):
     )
 
     print("Starting testing...")
+    print(f"Ensemble: {ensemble}")
     # Get test data
     test_data, test_embeddings = get_testing_dataset(
         Config.embedding_type, Config.dimension
@@ -220,8 +221,20 @@ def run_trail(Config):
     gpab.data = test_data
     gpab.embeddings = test_embeddings
 
+    print(f"Archive: {ensemble}")
+    file_name = "result.archive." + gpab.csv_name()
+    with open(f"{Config.algorithm}/result/{file_name}.txt", "w") as f:
+        for idx, top in enumerate(ensemble):
+            f.write(f"Forest {idx}\n")
+            for tree in top:
+                f.write(f"{tree}\n")
+            f.write("\n")
+
+    """
+
     # Get the best individuals
     archive = sorted(ensemble, key=lambda x: x.fitness.values, reverse=True)[:5]
+    print("Archive: ", archive)
 
     # Average the predicted vectors
     y_pred_ensemble = np.zeros(len(archive))
@@ -279,7 +292,7 @@ def run_trail(Config):
                 str(archive[4]),
             ]
             writer.writerow(row)
-
+    """
     return
 
 
