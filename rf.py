@@ -10,6 +10,7 @@ def planting_rf(dataset, Config, embeddings, cx_method):
     sub_dataset = dataset.sample(frac=0.8, replace=True)
 
     one_rf = gp.GP(
+        Config.algorithm,
         Config.embedding_type,
         Config.dimension,
         Config.population_size,

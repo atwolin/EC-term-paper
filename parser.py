@@ -4,7 +4,7 @@ import argparse
 class Config:
     def __init__(
         self,
-        algorithm
+        algorithm,
         embedding_type,
         dimension,
         population_size,
