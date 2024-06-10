@@ -81,13 +81,13 @@ def get_y(trees):
 
 def get_predict_word(y_pred_vec, embedding_type, embedding_model):
     if embedding_type == "word2vec":
-        y_pred_word = embedding_model.wv.similar_by_vector(y_pred_vec, topn=1)
+        y_pred_word = embedding_model.wv.most_similar(positive=[y_pred_vec], topn=1)
         return y_pred_word[0][0]
     elif embedding_type == "glove":
-        y_pred_word = embedding_model.similar_by_vector(y_pred_vec, topn=1)
+        y_pred_word = embedding_model.most_similar(positive=[y_pred_vec], topn=1)
         return y_pred_word[0][0]
     else:  # embedding_type == "fasttext"
-        y_pred_word = embedding_model.get_nearest_neighbors(y_pred_vec)
+        y_pred_word = embedding_model.get_nearest_neighbors(y_pred_vec, k=1)
         return y_pred_word[0][1]
 
 
