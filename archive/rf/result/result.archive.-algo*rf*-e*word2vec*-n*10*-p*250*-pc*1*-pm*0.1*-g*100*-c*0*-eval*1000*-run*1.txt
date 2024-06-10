@@ -1,0 +1,12 @@
+Forest 0
+add(e, a)
+add(a, b)
+add(a, b)
+add(b, a)
+add(a, b)
+add(a, b)
+add(a, b)
+add(a, b)
+add(a, b)
+add(a, b)
+

@@ -13,7 +13,7 @@ from deap import creator, base, tools, algorithms
 import deap.gp as gp
 from deap.gp import PrimitiveSet, genGrow
 from deap.gp import cxOnePoint as cx_simple
-from data import get_embeddings
+from data import get_embeddings, get_testing_dataset
 
 cur_path = os.getcwd()
 PATH = re.search(r"(.*EC-term-paper)", cur_path).group(0)
@@ -162,7 +162,7 @@ class GP:
         self.toolbox.register("cx_simple", cx_simple)
         self.toolbox.register("cx_uniform", self.cx_uniform)
         self.toolbox.register("cx_fair", self.cx_fair)
-        self.toolbox.register("cx_one", self.cxOnePoint)
+        self.toolbox.register("cx_one_point", self.cx_one_point)
 
         self.toolbox.register(
             "mutate", gp.mutUniform, expr=self.toolbox.expr, pset=self.pset
@@ -331,7 +331,7 @@ class GP:
             res += parent[idx].arity
         return stack, res, idx
 
-    def cxOnePoint(self, ind1, ind2):
+    def cx_one_point(self, ind1, ind2):
         idx1 = 0
         idx2 = 0
         # To track the trees
@@ -390,7 +390,7 @@ class GP:
                         self.toolbox.cx_simple,
                         self.toolbox.cx_uniform,
                         self.toolbox.cx_fair,
-                        self.toolbox.cx_one,
+                        self.toolbox.cx_one_point,
                     ]
                 )
                 try:
@@ -414,7 +414,7 @@ class GP:
                     pass
             if self.cx_method == CX_ONE_POINT:
                 try:
-                    ind1, ind2 = self.toolbox.cx_one(ind1, ind2)
+                    ind1, ind2 = self.toolbox.cx_one_point(ind1, ind2)
                 except:
                     pass
 
@@ -508,3 +508,96 @@ class GP:
                 self.select()
                 if self.eval_count % 1 == 0:
                     self.write_record(writer)
+
+
+# Testing
+def ensemble_testing(ensemble, Config, embedding_model):
+    test_data, test_embeddings = get_testing_dataset(
+        Config.embedding_type, Config.dimension
+    )
+
+    trees = GP(
+        Config.algorithm,
+        Config.embedding_type,
+        Config.dimension,
+        Config.population_size,
+        get_cx_num(Config.crossover_method),
+        Config.cross_prob,
+        Config.mut_prob,
+        Config.num_generations,
+        Config.num_evaluations,
+        test_data,
+        test_embeddings,
+        Config.run,
+    )
+    trees.register()
+
+    # Get the best 5 individuals
+    archive = sorted(ensemble, key=lambda x: x.fitness.values, reverse=True)[:5]
+
+    # Get X and y
+    # X = get_X(trees)
+    y = get_y(trees)
+
+    # Store and average the prediction of the best 5 individuals
+    y_pred_ensemble = np.zeros((len(archive), len(test_data), trees.dim))
+    each_fitness_for_each_datum = np.zeros((len(archive), len(test_data)))
+    for idx, tree in enumerate(archive):
+        # Get predict vecoters of all sentences
+        y_pred = get_predict_vec(tree, trees)
+        one_tree_fitness = cosine_similarity(y_pred, y).diagonal()
+        y_pred_ensemble[idx] = y_pred
+        each_fitness_for_each_datum[idx] = one_tree_fitness
+    avg_y_pred = np.mean(y_pred_ensemble, axis=0)
+
+    # Get the fitness value of the average prediction
+    y_pred_ensemble_fitness = cosine_similarity(avg_y_pred, y).diagonal()
+
+    # Get the predictied word of the best 5 individuals
+    words = []
+    for vec in avg_y_pred:
+        word = get_predict_word(vec, Config.embedding_type, embedding_model)
+        words.append(word)
+
+    # Save the sentences, predicted words, and record
+    csv_name = "result." + trees.csv_name()
+
+    os.makedirs(f"archive/{Config.algorithm}/result/", exist_ok=True)
+    with open(f"archive/{Config.algorithm}/result/{csv_name}", "w") as f:
+        writer = csv.writer(f)
+        writer.writerow(
+            [
+                "input_word",
+                "predict_word",
+                "real_word",
+                "fitness value[0]",
+                "fitness value[1]",
+                "fitness value[2]",
+                "fitness value[3]",
+                "fitness value[4]",
+                "avg fiteness value",
+                "tree[0]",
+                "tree[1]",
+                "tree[2]",
+                "tree[3]",
+                "tree[4]",
+            ]
+        )
+        for i in range(len(test_data)):
+            row = [
+                str(trees.inputword[i]),
+                words[i],
+                trees.realword[i],
+                each_fitness_for_each_datum[0][i],
+                each_fitness_for_each_datum[1][i],
+                each_fitness_for_each_datum[2][i],
+                each_fitness_for_each_datum[3][i],
+                each_fitness_for_each_datum[4][i],
+                y_pred_ensemble_fitness[i],
+                str(archive[0]),
+                str(archive[1]),
+                str(archive[2]),
+                str(archive[3]),
+                str(archive[4]),
+            ]
+            writer.writerow(row)
