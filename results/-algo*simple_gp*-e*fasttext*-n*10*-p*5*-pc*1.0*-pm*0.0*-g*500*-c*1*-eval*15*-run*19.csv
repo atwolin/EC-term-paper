@@ -1,0 +1,4 @@
+eval_count,avg,std,min,max,best_individual
+9,0.09400303816732962,0.10720862001756774,0.0,0.28645064710442614,"multiply(square(protected_div(b, c)), protected_div(b, protected_div(b, b)))"
+13,0.23021552486532904,0.2569631593750691,0.0,0.7028291094231668,"multiply(square(protected_div(b, protected_div(b, protected_div(b, b)))), protected_div(b, protected_div(b, b)))"
+17,0.24357321896313672,0.24615742955885972,0.025970523518765935,0.7028291094231668,"multiply(square(protected_div(b, protected_div(b, protected_div(b, b)))), protected_div(b, protected_div(b, b)))"

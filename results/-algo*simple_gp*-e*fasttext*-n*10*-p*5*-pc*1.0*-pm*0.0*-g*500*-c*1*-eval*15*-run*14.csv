@@ -1,0 +1,4 @@
+eval_count,avg,std,min,max,best_individual
+9,0.11854190614138631,0.009659906996232466,0.10199458898579351,0.1289210554335159,"square(protected_sqrt(protected_sqrt(add(multiply(b, d), protected_div(b, b)))))"
+13,0.1219163033443629,0.005213980020721998,0.11563914190286168,0.1289210554335159,"square(protected_sqrt(protected_sqrt(add(multiply(b, d), protected_div(b, b)))))"
+17,0.12482556205915847,0.006579957082814955,0.11563914190286168,0.1334128685746544,square(protected_sqrt(b))

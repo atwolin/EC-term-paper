@@ -509,12 +509,17 @@ class GP:
                 if self.eval_count % 1 == 0:
                     self.write_record(writer)
 
+        return csv_name
+
+
     def eval(self, expression, data, model):
         individual = gp.PrimitiveTree.from_string(expression, self.pset)
         inputword_ = data[0].str.split(" ").apply(lambda x: x[:5])
         realword_ = data[0].str.split(" ").str.get(5)
         func = gp.compile(individual, self.pset)
-        similarity_ = []
+
+        similarity_=[]
+
         print("Start evaluating...")
         for data_index in range(len(inputword_)):
             words = inputword_.iloc[data_index]
@@ -533,6 +538,7 @@ class GP:
         #     elif self.embedding_type == "fasttext":
         #         outword = model.get_nearest_neighbors(predict, k=1)
         # print(f"預測結果：{outword}")
+
 
 
 # Testing
@@ -629,3 +635,4 @@ def ensemble_testing(ensemble, Config, embedding_model):
                 str(archive[4]),
             ]
             writer.writerow(row)
+
