@@ -509,6 +509,31 @@ class GP:
                 if self.eval_count % 1 == 0:
                     self.write_record(writer)
 
+    def eval(self, expression, data, model):
+        individual = gp.PrimitiveTree.from_string(expression, self.pset)
+        inputword_ = data[0].str.split(" ").apply(lambda x: x[:5])
+        realword_ = data[0].str.split(" ").str.get(5)
+        func = gp.compile(individual, self.pset)
+        similarity_ = []
+        print("Start evaluating...")
+        for data_index in range(len(inputword_)):
+            words = inputword_.iloc[data_index]
+            in_vectors = [self.embeddings[word] for word in words]
+            a, b, c, d, e = in_vectors[:5]
+            y = realword_.iloc[data_index]
+            out_vector = self.embeddings[y]
+            predict = self.clean_data(func(a, b, c, d, e))
+            similarity_.append(cosine_similarity([predict], [out_vector])[0][0])
+        return similarity_
+        #     if self.embedding_type == "word2vec":
+        #         outword = model.wv.most_similar(positive=[predict], topn=1)
+        #         print(f"預測結果：{outword}")
+        # # elif self.embeddings_model == "glove":
+        # #     outword = model.wv.most_similar(positive=[predict], topn=1)
+        #     elif self.embedding_type == "fasttext":
+        #         outword = model.get_nearest_neighbors(predict, k=1)
+        # print(f"預測結果：{outword}")
+
 
 # Testing
 def ensemble_testing(ensemble, Config, embedding_model):
