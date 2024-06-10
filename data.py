@@ -78,6 +78,7 @@ def get_training_dataset():
 
     return data
 
+
 def get_testing_dataset():
     df = pd.read_csv(f"{PATH}/data/test/testing.txt", sep="\t", header=None)
     # Get a sub-dataset
@@ -85,6 +86,7 @@ def get_testing_dataset():
     data = df.iloc[idx]
 
     return data
+
 
 def get_testing_embeddings(model, dim):
     word2vec_model, glove_model, fastText_model = load_model(dim)
@@ -185,6 +187,8 @@ if __name__ == "__main__":
     if test_word in glove_model:
         print(f"vector for glove: {glove_model[test_word]}")
     print(f"vector for fastText: {fastText_model.get_word_vector(test_word)}")
+
+    from gp import get_predict_word
 
     # Test most similar word
     # predict = "education"

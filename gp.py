@@ -511,14 +511,13 @@ class GP:
 
         return csv_name
 
-
     def eval(self, expression, data, model):
         individual = gp.PrimitiveTree.from_string(expression, self.pset)
         inputword_ = data[0].str.split(" ").apply(lambda x: x[:5])
         realword_ = data[0].str.split(" ").str.get(5)
         func = gp.compile(individual, self.pset)
 
-        similarity_=[]
+        similarity_ = []
 
         print("Start evaluating...")
         for data_index in range(len(inputword_)):
@@ -538,7 +537,6 @@ class GP:
         #     elif self.embedding_type == "fasttext":
         #         outword = model.get_nearest_neighbors(predict, k=1)
         # print(f"預測結果：{outword}")
-
 
 
 # Testing
@@ -589,7 +587,17 @@ def ensemble_testing(ensemble, Config, embedding_model):
     # Get the predictied word of the best 5 individuals
     words = []
     for vec in avg_y_pred:
-        word = get_predict_word(vec, Config.embedding_type, embedding_model)
+        if Config.embedding_type == "word2vec":
+            word = embedding_model.wv.most_similar(positive=[vec], topn=1)
+            # return y_pred_word[0][0]
+        elif Config.embedding_type == "glove":
+            word = embedding_model.most_similar(positive=[vec], topn=1)
+            # return y_pred_word[0][0]
+        else:  # embedding_type == "fasttext"
+            # word = embedding_model.get_nearest_neighbors(vec, k=1)
+            word = vec
+            # return y_pred_word[0][1]
+        # word = get_predict_word(vec, Config.embedding_type, embedding_model)
         words.append(word)
 
     # Save the sentences, predicted words, and record
@@ -635,4 +643,3 @@ def ensemble_testing(ensemble, Config, embedding_model):
                 str(archive[4]),
             ]
             writer.writerow(row)
-
