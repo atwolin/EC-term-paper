@@ -1,0 +1,4 @@
+eval_count,avg,std,min,max,best_individual
+9,0.08988845803314814,0.049151354857203566,0.02306209760796559,0.13542560539471804,"protected_sqrt(protected_sqrt(multiply(protected_sqrt(add(d, a)), multiply(multiply(a, e), protected_sqrt(a)))))"
+13,0.11246279153388214,0.037909586156426804,0.03718930816102693,0.13593376511163555,"protected_sqrt(protected_sqrt(multiply(protected_sqrt(add(c, a)), multiply(multiply(a, e), protected_sqrt(a)))))"
+17,0.11496407515553422,0.03894124056549118,0.03718930816102693,0.13593376511163555,"protected_sqrt(protected_sqrt(multiply(protected_sqrt(add(c, a)), multiply(multiply(a, e), protected_sqrt(a)))))"

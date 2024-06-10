@@ -78,6 +78,36 @@ def get_training_dataset():
 
     return data
 
+def get_testing_dataset():
+    df = pd.read_csv(f"{PATH}/data/test/testing.txt", sep="\t", header=None)
+    # Get a sub-dataset
+    idx = random.sample(range(0, len(df)), int(len(df) * (0.01)))
+    data = df.iloc[idx]
+
+    return data
+
+def get_testing_embeddings(model, dim):
+    word2vec_model, glove_model, fastText_model = load_model(dim)
+
+    # Get the training dataset
+    data = get_testing_dataset()
+
+    embeddings = {}
+    embedding_model = None
+    for line in data[0]:
+        for word in line.split():
+            if model == "word2vec" and word in word2vec_model.wv:
+                embeddings[word] = word2vec_model.wv[word]
+                embedding_model = word2vec_model
+            elif model == "glove" and word in glove_model:
+                embeddings[word] = glove_model[word]
+                embedding_model = glove_model
+            else:  # model == "fasttext" and word in fastText_model:
+                embeddings[word] = fastText_model.get_word_vector(word)
+                embedding_model = fastText_model
+
+    return data, embeddings, embedding_model
+
 
 def get_testing_dataset(model, dim):
     """
