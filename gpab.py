@@ -1,5 +1,8 @@
 import sys
+import os
+import re
 import warnings
+from tqdm import tqdm
 import random
 import csv
 import numpy as np
@@ -11,6 +14,10 @@ from data import get_embeddings, get_testing_dataset
 # random.seed(seed)
 
 # python main.py -algo "gpab" -e "word2vec" -n 10 -p 250 -c cx_random -pc 1 -pm 0.1 -g 100
+
+cur_path = os.getcwd()
+PATH = re.search(r"(.*EC-term-paper)", cur_path).group(0)
+# print(PATH)
 
 
 def update_weights(
@@ -68,6 +75,7 @@ def update_weights(
 def boosting(
     gpab, data, ensemble, num_ensemble, iboost, sample_weight, loss, learning_rate
 ):
+
     epsilon = np.finfo(sample_weight.dtype).eps
     zero_weight_mask = sample_weight == 0.0
 
@@ -95,7 +103,7 @@ def boosting(
 
     # Early termination
     if sample_weight is None:
-        return sample_weight, best_ind
+        return sample_weight, []
 
     # Stop if error is zero
     if estimator_error == 0:
@@ -122,7 +130,7 @@ def boosting(
         # Normalize
         sample_weight /= sample_weight_sum
 
-    print("Sample weight: ", sample_weight)
+    # print("Sample weight: ", sample_weight)
     data["weights_update"] *= sample_weight
 
     return sample_weight, best_ind
@@ -167,11 +175,26 @@ def evolving(
                 loss,
                 learning_rate,
             )
+            if sample_weight is None:
+                sample_weight = np.array(data["weights_update"])
+                continue
             ensemble.append(best)
 
             # Update the data
             select_new_data(gpab, best, data)
 
+        # Record the statistics
+        csv_name = gpab.csv_name()
+        # os.makedirs(f"{PATH}/results", exist_ok=True)
+        # print(f"csv_name: {csv_name},run:{self.run}")
+
+        with open(f"{PATH}/results/{csv_name}.csv", "w", newline="") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(
+                ["eval_count", "avg", "std", "min", "max", "best_individual"]
+            )
+            if gpab.eval_count % 1 == 0:
+                gpab.write_record(writer)
         gpab.n_gen += 1
 
 
@@ -208,96 +231,22 @@ def run_trail(Config):
         Config.run,
     )
     gpab.initialize_pop()
+    print("Starting evolving...")
     evolving(
         gpab, data, ensemble, num_ensemble, iboost, sample_weight, loss, learning_rate
     )
 
+    # for ind in ensemble:
+    #     print(f"Individual: {ind}")
+    #     print(type(ind))
+
     print("Starting testing...")
-    print(f"Ensemble: {ensemble}")
-    # Get test data
-    test_data, test_embeddings = get_testing_dataset(
-        Config.embedding_type, Config.dimension
-    )
-    gpab.data = test_data
-    gpab.embeddings = test_embeddings
-
-    print(f"Archive: {ensemble}")
-    file_name = "result.archive." + gpab.csv_name()
-    with open(f"{Config.algorithm}/result/{file_name}.txt", "w") as f:
-        for idx, top in enumerate(ensemble):
-            f.write(f"Forest {idx}\n")
-            for tree in top:
-                f.write(f"{tree}\n")
-            f.write("\n")
-
-    """
-
-    # Get the best individuals
-    archive = sorted(ensemble, key=lambda x: x.fitness.values, reverse=True)[:5]
-    print("Archive: ", archive)
-
-    # Average the predicted vectors
-    y_pred_ensemble = np.zeros(len(archive))
-    for idx, tree in enumerate(archive):
-        # Get predict vecoters of all sentences
-        y_pred = gp.get_predict_vec(gpab, tree)
-        y_pred_ensemble[idx] = y_pred
-    avg_y_pred = np.mean(y_pred_ensemble, axis=0)
-
-    # Get the predicted words of all sentences
-    words = []
-    for vec in avg_y_pred:
-        word = gp.get_predict_word(vec, Config.embedding_type, embedding_model)
-        words.append(word)
-    X = gp.get_X(gpab)
-    y = gp.get_y(gpab)
-
-    # Save the sentences, predicted words, and record
-    csv_name = "result." + gpab.csv_name()
-    with open(f"{Config.algorithm}/result/{csv_name}", "w") as f:
-        writer = csv.writer(f)
-        writer.writerow(
-            [
-                "input_word",
-                "predict_word",
-                "real_word",
-                "fitness value[0]",
-                "fitness value[1]",
-                "fitness value[2]",
-                "fitness value[3]",
-                "fitness value[4]",
-                "avg fiteness value",
-                "tree[0]",
-                "tree[1]",
-                "tree[2]",
-                "tree[3]",
-                "tree[4]",
-            ]
-        )
-        for i in len(test_data):
-            row = [
-                X[i],
-                words[i],
-                y[i],
-                archive[0].fitness.values,
-                archive[1].fitness.values,
-                archive[2].fitness.values,
-                archive[3].fitness.values,
-                archive[4].fitness.values,
-                avg_y_pred[i],
-                str(archive[0]),
-                str(archive[1]),
-                str(archive[2]),
-                str(archive[3]),
-                str(archive[4]),
-            ]
-            writer.writerow(row)
-    """
+    gp.ensemble_testing(ensemble, Config, embedding_model)
     return
 
 
 def gpab(config):
-    for i in range(30):
+    for i in tqdm(range(10)):
         config.run = i + 1
         run_trail(config)
     return
