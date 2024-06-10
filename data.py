@@ -146,24 +146,24 @@ if __name__ == "__main__":
     # data = get_subdataset(1)
 
     # Get the embeddings
-    # data, embeddings, model = get_embeddings("fasttext", 10, 1)
+    # data, embeddings, model = get_embeddings("glove", 10)
     # print("data: ", type(data))
 
     # Test the model
-    # test_word = "education"
-    # print(f"vector for word2vec: {word2vec_model.wv[test_word]}")
-    # if test_word in glove_model:
-    #     print(f"vector for glove: {glove_model[test_word]}")
-    # print(f"vector for fastText: {fastText_model.get_word_vector(test_word)}")
+    test_word = "education"
+    print(f"vector for word2vec: {word2vec_model.wv[test_word]}")
+    if test_word in glove_model:
+        print(f"vector for glove: {glove_model[test_word]}")
+    print(f"vector for fastText: {fastText_model.get_word_vector(test_word)}")
 
     # Test most similar word
-    predict = "education"
-    print(
-        f"1.  vector for word2vec: {word2vec_model.wv.most_similar(positive=[predict], topn=1)}"
-    )
-    print(
-        f"2.  vector for glove: {glove_model.most_similar(positive=[predict], topn=1)}"
-    )
-    print(
-        f"3.  vector for fastText: {fastText_model.get_nearest_neighbors(predict, k=1)}"
-    )
+    # predict = "education"
+    # print(
+    #     f"1.  vector for word2vec: {word2vec_model.wv.most_similar(positive=[predict], topn=1)}"
+    # )
+    # print(
+    #     f"2.  vector for glove: {glove_model.most_similar(positive=[predict], topn=1)}"
+    # )
+    # print(
+    #     f"3.  vector for fastText: {fastText_model.get_nearest_neighbors(predict, k=1)}"
+    # )
