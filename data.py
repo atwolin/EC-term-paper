@@ -6,6 +6,9 @@ import pandas as pd
 from gensim.models import Word2Vec
 import fasttext
 import fasttext.util
+from gensim.test.utils import datapath, get_tmpfile
+from gensim.models import KeyedVectors
+from gensim.scripts.glove2word2vec import glove2word2vec
 
 cur_path = os.getcwd()
 PATH = re.search(r"(.*EC-term-paper)", cur_path).group(0)
@@ -52,17 +55,8 @@ def load_model(dim):
     word2vec_model = Word2Vec.load(f"{PATH}/model/word2vec/word2vec.{dim}.model")
 
     # GloVe model
-    def load_glove(file_path):
-        glove_vectors = {}
-        with open(file_path, "r", encoding="utf-8") as f:
-            for line in f:
-                values = line.split()
-                word = values[0]
-                vector = np.asarray(values[1:], "float32")
-                glove_vectors[word] = vector
-        return glove_vectors
-
-    glove_model = load_glove(f"{PATH}/model/glove/vectors.{dim}.txt")
+    glove_path = f"{PATH}/model/glove/vectors.{dim}.txt"
+    glove_model = KeyedVectors.load_word2vec_format(glove_path, no_header=True)
 
     # FastText model
     fastText_model = fasttext.load_model(
@@ -84,6 +78,7 @@ def get_training_dataset():
 
     return data
 
+
 def get_testing_dataset():
     df = pd.read_csv(f"{PATH}/data/test/testing.txt", sep="\t", header=None)
     # Get a sub-dataset
@@ -91,6 +86,7 @@ def get_testing_dataset():
     data = df.iloc[idx]
 
     return data
+
 
 def get_testing_embeddings(model, dim):
     word2vec_model, glove_model, fastText_model = load_model(dim)
@@ -176,18 +172,32 @@ def get_embeddings(model, dim):
 
 if __name__ == "__main__":
     # Load models
-    # word2vec_model, glove_model, fastText_model = load_model(10)
+    word2vec_model, glove_model, fastText_model = load_model(10)
 
     # Get sub-dataset
     # data = get_subdataset(1)
 
     # Get the embeddings
-    data, embeddings, model = get_embeddings("fasttext", 10, 1)
-    print("data: ", type(data))
+    # data, embeddings, model = get_embeddings("glove", 10)
+    # print("data: ", type(data))
 
     # Test the model
-    # test_word = "education"
-    # print(f"vector for word2vec: {word2vec_model.wv[test_word]}")
-    # if test_word in glove_model:
-    #     print(f"vector for glove: {glove_model[test_word]}")
-    # print(f"vector for fastText: {fastText_model.get_word_vector(test_word)}")
+    test_word = "education"
+    print(f"vector for word2vec: {word2vec_model.wv[test_word]}")
+    if test_word in glove_model:
+        print(f"vector for glove: {glove_model[test_word]}")
+    print(f"vector for fastText: {fastText_model.get_word_vector(test_word)}")
+
+    from gp import get_predict_word
+
+    # Test most similar word
+    # predict = "education"
+    # print(
+    #     f"1.  vector for word2vec: {word2vec_model.wv.most_similar(positive=[predict], topn=1)}"
+    # )
+    # print(
+    #     f"2.  vector for glove: {glove_model.most_similar(positive=[predict], topn=1)}"
+    # )
+    # print(
+    #     f"3.  vector for fastText: {fastText_model.get_nearest_neighbors(predict, k=1)}"
+    # )
