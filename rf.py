@@ -1,5 +1,6 @@
 import random
 import csv
+from tqdm import tqdm
 import numpy as np
 import gp
 from data import get_embeddings, get_testing_dataset
@@ -44,26 +45,30 @@ def run_trail(Config):
 
     cx_method = gp.get_cx_num(Config.crossover_method)
 
-    num_ensemble = 200  # Number of individuals to keep in the ensemble
-    num_pick_best = 10  # Number of best individuals to pick from one forest
+    num_pick = 20  # Number of best individuals to pick from one forest
     ensemble = []  # ensemble to store the best individuals
     total_eval = 0
 
-    for i in range(num_ensemble // num_pick_best):
+    for i in range(num_pick):
         one_rf, eval_num = planting_rf(data, Config, embeddings, cx_method)
         top = sorted(one_rf.pop, key=lambda x: x.fitness.values, reverse=True)[:10]
-        ensemble.append(top)
+        ensemble.extend(top)
         total_eval += eval_num
+        Config.run += 0.01
         if total_eval >= Config.num_evaluations:
             break
+    # for ind in ensemble:
+    #     print(f"Individual: {ind}")
+    #     print(type(ind))
 
     print("Starting testing...")
+    # print(f"run: {Config.run}")
     gp.ensemble_testing(ensemble, Config, embedding_model)
     return
 
 
 def random_forest(config):
-    for num in range(30):
+    for num in tqdm(range(30)):
         config.run = num + 1
         run_trail(config)
     return

@@ -532,9 +532,11 @@ def ensemble_testing(ensemble, Config, embedding_model):
     )
     trees.register()
 
+    # for ind in ensemble:
+    #     print(type(ind))
+
     # Get the best 5 individuals
     archive = sorted(ensemble, key=lambda x: x.fitness.values, reverse=True)[:5]
-
     # Get X and y
     # X = get_X(trees)
     y = get_y(trees)
@@ -544,7 +546,7 @@ def ensemble_testing(ensemble, Config, embedding_model):
     each_fitness_for_each_datum = np.zeros((len(archive), len(test_data)))
     for idx, tree in enumerate(archive):
         # Get predict vecoters of all sentences
-        y_pred = get_predict_vec(tree, trees)
+        y_pred = get_predict_vec(trees, tree)
         one_tree_fitness = cosine_similarity(y_pred, y).diagonal()
         y_pred_ensemble[idx] = y_pred
         each_fitness_for_each_datum[idx] = one_tree_fitness
@@ -561,8 +563,9 @@ def ensemble_testing(ensemble, Config, embedding_model):
 
     # Save the sentences, predicted words, and record
     csv_name = "result." + trees.csv_name()
+    print(f"Run {Config.run} save data")
 
-    os.makedirs(f"archive/{Config.algorithm}/result/", exist_ok=True)
+    # os.makedirs(f"archive/{Config.algorithm}/result/", exist_ok=True)
     with open(f"archive/{Config.algorithm}/result/{csv_name}", "w") as f:
         writer = csv.writer(f)
         writer.writerow(

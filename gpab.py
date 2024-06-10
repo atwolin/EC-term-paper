@@ -1,5 +1,8 @@
 import sys
+import os
+import re
 import warnings
+from tqdm import tqdm
 import random
 import csv
 import numpy as np
@@ -11,6 +14,10 @@ from data import get_embeddings, get_testing_dataset
 # random.seed(seed)
 
 # python main.py -algo "gpab" -e "word2vec" -n 10 -p 250 -c cx_random -pc 1 -pm 0.1 -g 100
+
+cur_path = os.getcwd()
+PATH = re.search(r"(.*EC-term-paper)", cur_path).group(0)
+# print(PATH)
 
 
 def update_weights(
@@ -68,6 +75,7 @@ def update_weights(
 def boosting(
     gpab, data, ensemble, num_ensemble, iboost, sample_weight, loss, learning_rate
 ):
+
     epsilon = np.finfo(sample_weight.dtype).eps
     zero_weight_mask = sample_weight == 0.0
 
@@ -95,7 +103,7 @@ def boosting(
 
     # Early termination
     if sample_weight is None:
-        return sample_weight, best_ind
+        return sample_weight, []
 
     # Stop if error is zero
     if estimator_error == 0:
@@ -122,7 +130,7 @@ def boosting(
         # Normalize
         sample_weight /= sample_weight_sum
 
-    print("Sample weight: ", sample_weight)
+    # print("Sample weight: ", sample_weight)
     data["weights_update"] *= sample_weight
 
     return sample_weight, best_ind
@@ -167,11 +175,26 @@ def evolving(
                 loss,
                 learning_rate,
             )
+            if sample_weight is None:
+                sample_weight = np.array(data["weights_update"])
+                continue
             ensemble.append(best)
 
             # Update the data
             select_new_data(gpab, best, data)
 
+        # Record the statistics
+        csv_name = gpab.csv_name()
+        # os.makedirs(f"{PATH}/results", exist_ok=True)
+        # print(f"csv_name: {csv_name},run:{self.run}")
+
+        with open(f"{PATH}/results/{csv_name}.csv", "w", newline="") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(
+                ["eval_count", "avg", "std", "min", "max", "best_individual"]
+            )
+            if gpab.eval_count % 1 == 0:
+                gpab.write_record(writer)
         gpab.n_gen += 1
 
 
@@ -208,9 +231,14 @@ def run_trail(Config):
         Config.run,
     )
     gpab.initialize_pop()
+    print("Starting evolving...")
     evolving(
         gpab, data, ensemble, num_ensemble, iboost, sample_weight, loss, learning_rate
     )
+
+    # for ind in ensemble:
+    #     print(f"Individual: {ind}")
+    #     print(type(ind))
 
     print("Starting testing...")
     gp.ensemble_testing(ensemble, Config, embedding_model)
@@ -218,7 +246,7 @@ def run_trail(Config):
 
 
 def gpab(config):
-    for i in range(30):
+    for i in tqdm(range(10)):
         config.run = i + 1
         run_trail(config)
     return
