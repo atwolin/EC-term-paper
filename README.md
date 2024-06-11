@@ -9,7 +9,7 @@ git clone https://github.com/atwolin/EC-term-paper.git
 cd EC-term-paper
 ```
 
-Run this command to exucute simple GP,
+After training embedding models, run this command to exucute simple GP,
 ```bash
 python main.py -algo "simple_gp" -e "word2vec" -n 10 -p 500 -pc 1.0 -pm 0.3 -c "cx_random" -eval 10000 -d
 ```
