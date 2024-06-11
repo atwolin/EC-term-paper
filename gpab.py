@@ -188,13 +188,11 @@ def evolving(
         # os.makedirs(f"{PATH}/results", exist_ok=True)
         # print(f"csv_name: {csv_name},run:{self.run}")
 
-        with open(f"{PATH}/results/{csv_name}.csv", "w", newline="") as csvfile:
+        with open(f"{PATH}/results/{csv_name}.csv", "a", newline="") as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow(
-                ["eval_count", "avg", "std", "min", "max", "best_individual"]
-            )
-            if gpab.eval_count % 1 == 0:
-                gpab.write_record(writer)
+            gpab.write_record(writer)
+            if gpab.eval_count % 6 == 0:
+                print(f"Eval: {gpab.eval_count}")
         gpab.n_gen += 1
 
 
@@ -231,6 +229,16 @@ def run_trail(Config):
         Config.run,
     )
     gpab.initialize_pop()
+    # Record the statistics
+    csv_name = gpab.csv_name()
+    # os.makedirs(f"{PATH}/results", exist_ok=True)
+    # print(f"csv_name: {csv_name},run:{self.run}")
+
+    with open(f"{PATH}/results/{csv_name}.csv", "w", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["eval_count", "avg", "std", "min", "max", "best_individual"])
+        if gpab.eval_count % 1 == 0:
+            gpab.write_record(writer)
     print("Starting evolving...")
     evolving(
         gpab, data, ensemble, num_ensemble, iboost, sample_weight, loss, learning_rate
