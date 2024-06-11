@@ -188,7 +188,7 @@ def evolving(
         # os.makedirs(f"{PATH}/results", exist_ok=True)
         # print(f"csv_name: {csv_name},run:{self.run}")
 
-        with open(f"{PATH}/results/{csv_name}.csv", "w", newline="") as csvfile:
+        with open(f"{PATH}/results/{csv_name}.csv", "a", newline="") as csvfile:
             writer = csv.writer(csvfile)
             gpab.write_record(writer)
             if gpab.eval_count % 6 == 0:
