@@ -1,0 +1,2 @@
+Best fitness: 0.8140243419595049
+Best individual: add(add(c, add(protected_div(add(e, d), protected_div(e, e)), e)), b)
