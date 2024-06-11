@@ -1,0 +1,22 @@
+eval_count,avg,std,min,max,best_individual
+15,-0.0191591449909307,0.028696761328938024,-0.06463239927837773,0.036988983963461064,square(a)
+19,-0.0191591449909307,0.028696761328938024,-0.06463239927837773,0.036988983963461064,square(a)
+23,-0.017830135407647836,0.027265259405330738,-0.06463239927837773,0.036988983963461064,square(a)
+27,-0.01596487803687338,0.028013754841053274,-0.06463239927837773,0.036988983963461064,square(a)
+32,-0.006700111053461547,0.034946419435736654,-0.06463239927837773,0.05854734409358805,"add(e, multiply(protected_div(multiply(e, a), protected_div(a, d)), add(protected_div(add(b, a), b), protected_div(protected_div(subtract(a, b), d), d))))"
+37,0.029467315876548234,0.10784345668321536,-0.06463239927837773,0.3361203699847367,"add(e, multiply(protected_div(multiply(multiply(square(c), add(d, e)), a), protected_div(a, d)), add(protected_div(add(b, a), b), protected_div(protected_div(subtract(a, d), d), d))))"
+41,0.03679443285797518,0.10519629742914265,-0.06463239927837773,0.3361203699847367,"add(e, multiply(protected_div(multiply(multiply(square(c), add(d, e)), a), protected_div(a, d)), add(protected_div(add(b, a), b), protected_div(protected_div(subtract(a, d), d), d))))"
+45,0.043609676287578406,0.10050767024082241,-0.03525153309715758,0.3361203699847367,"add(e, multiply(protected_div(multiply(multiply(square(c), add(d, e)), a), protected_div(a, d)), add(protected_div(add(b, a), b), protected_div(protected_div(subtract(a, d), d), d))))"
+49,0.043609676287578406,0.10050767024082241,-0.03525153309715758,0.3361203699847367,"add(e, multiply(protected_div(multiply(multiply(square(c), add(d, e)), a), protected_div(a, d)), add(protected_div(add(b, a), b), protected_div(protected_div(subtract(a, d), d), d))))"
+54,0.05470176770899917,0.09726063293002833,-0.0021511972675400414,0.3361203699847367,"add(e, multiply(protected_div(multiply(multiply(square(c), add(d, e)), a), protected_div(a, d)), add(protected_div(add(b, a), b), protected_div(protected_div(subtract(a, d), d), d))))"
+58,0.062472854737728435,0.09595657070972928,-0.0021511972675400414,0.3361203699847367,"add(e, multiply(protected_div(multiply(multiply(square(c), add(d, e)), a), protected_div(a, d)), add(protected_div(add(b, a), b), protected_div(protected_div(subtract(a, d), d), d))))"
+62,0.08708886869451424,0.11578676138986163,-0.0021511972675400414,0.3361203699847367,"add(e, multiply(protected_div(multiply(multiply(square(c), add(d, e)), a), protected_div(a, d)), add(protected_div(add(b, a), b), protected_div(protected_div(subtract(a, d), d), d))))"
+66,0.12734620253909484,0.14484653653178967,-0.0021511972675400414,0.402573338445806,"add(e, multiply(protected_div(multiply(multiply(square(c), add(d, e)), a), protected_div(a, d)), add(protected_div(add(b, a), b), protected_div(protected_div(subtract(a, multiply(e, d)), a), d))))"
+70,0.1351172895678241,0.13999821227159148,-0.0021511972675400414,0.402573338445806,"add(e, multiply(protected_div(multiply(multiply(square(c), add(d, e)), a), protected_div(a, d)), add(protected_div(add(b, a), b), protected_div(protected_div(subtract(a, multiply(e, d)), a), d))))"
+74,0.17512012652559358,0.16029405796459237,-0.0021511972675400414,0.43131105972342715,"add(e, multiply(protected_div(multiply(e, d), protected_div(a, d)), subtract(a, multiply(e, d))))"
+79,0.1886905006844945,0.1555239787408239,-0.0021511972675400414,0.43131105972342715,"add(e, multiply(protected_div(multiply(e, d), protected_div(a, d)), subtract(a, multiply(e, d))))"
+83,0.19590543529443405,0.14827076547064483,-0.0021511972675400414,0.43131105972342715,"add(e, multiply(protected_div(multiply(e, d), protected_div(a, d)), subtract(a, multiply(e, d))))"
+88,0.20567149825650924,0.14353663784977166,-0.0021511972675400414,0.43131105972342715,"add(e, multiply(protected_div(multiply(e, d), protected_div(a, d)), subtract(a, multiply(e, d))))"
+92,0.21752966871306395,0.13705888418815276,-0.0021511972675400414,0.43131105972342715,"add(e, multiply(protected_div(multiply(e, d), protected_div(a, d)), subtract(a, multiply(e, d))))"
+96,0.2293878391696186,0.12917537169070978,-0.0021511972675400414,0.43131105972342715,"add(e, multiply(protected_div(multiply(e, d), protected_div(a, d)), subtract(a, multiply(e, d))))"
+101,0.2523300344871205,0.1407520765838513,-0.0021511972675400414,0.43131105972342715,"add(e, multiply(protected_div(multiply(e, d), protected_div(a, d)), subtract(a, multiply(e, d))))"

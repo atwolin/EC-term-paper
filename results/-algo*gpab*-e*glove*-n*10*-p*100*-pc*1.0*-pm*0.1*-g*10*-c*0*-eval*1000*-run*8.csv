@@ -1,0 +1,2 @@
+eval_count,avg,std,min,max,best_individual
+1143,0.04792814446678415,0.14331276554951142,-0.33135842081746797,0.48064571195347905,"multiply(protected_sqrt(e), add(c, d))"
