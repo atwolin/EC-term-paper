@@ -1,0 +1,2 @@
+Best fitness: 0.5511248235341875
+Best individual: add(add(add(add(b, c), add(d, c)), e), e)
