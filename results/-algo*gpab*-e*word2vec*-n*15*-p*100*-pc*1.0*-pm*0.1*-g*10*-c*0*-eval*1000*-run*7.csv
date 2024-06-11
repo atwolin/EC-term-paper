@@ -1,0 +1,2 @@
+eval_count,avg,std,min,max,best_individual
+1140,0.08759868051997623,0.09942324134023195,-0.10372001756482364,0.4080141829039309,"add(multiply(add(add(d, a), add(c, e)), protected_sqrt(add(e, e))), protected_div(add(add(b, a), protected_sqrt(d)), protected_sqrt(subtract(b, c))))"
